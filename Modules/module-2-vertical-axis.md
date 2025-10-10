@@ -116,4 +116,3 @@ Ensure static deflection under max cutting force is less than half the positioni
 
 ---
 
-**All equations, tables, and content have been formatted for GitHub. Let me know if you want additional modules remade, or further formatting adjustments!**
