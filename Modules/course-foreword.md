@@ -8,10 +8,10 @@ This course is the result of collaboration, curiosity, and a shared belief that 
 
 ---
 
-## Inspirational Message
+## A message to Anyone with an Interest in Mechanical Design and Engineering 
 
-**Every great machine started as a spark of imagination.**
+**Every great machine started as a problem without an answer.**
 
-Let this course be your launchpad. Build with curiosity, learn with persistence, and create with passion. The future of fabrication is in your hands—make it extraordinary.
+Let this course be your launchpad. Build with curiosity, learn with persistence, and create with passion. You are the future of innovation human progress.
 
 ---
