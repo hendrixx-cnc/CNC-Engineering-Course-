@@ -1,5 +1,7 @@
 # CNC Engineering Course
 
+**Author**: Todd | **Company**: Hendrixx Design | **Contact**: todd@hendrixxdesign.com
+
 ## CNC Gantry Design Course
 
 A comprehensive, open-source guide for makers, engineers, and innovators who want to master the art and science of modern CNC systems.
@@ -17,8 +19,12 @@ This course provides in-depth knowledge about designing, building, and optimizin
 - Control electronics and motion controllers
 - Tool-specific modules (plasma, spindle, fiber laser, water jet)
 - Advanced systems (pick & place, robotic arms, large-format FDM printers)
-- LinuxCNC HAL integration and real-time control
-- G-code programming and CAD/DFM workflows
+- CAD design and modeling for CNC manufacturing
+- CAM programming and toolpath generation
+- G-code programming and optimization
+- Quality management systems and metrology
+- Shop organization and L.E.A.N. manufacturing strategies
+- Business ownership and management
 - EMI/EMC considerations and safety protocols
 
 ---
@@ -35,36 +41,36 @@ This course provides in-depth knowledge about designing, building, and optimizin
 
 ## 📚 Course Modules
 
-### Foundation Modules
-- **Module 1**: Mechanical Frame & Structural Design
-- **Module 2**: Motors & Drive Systems
-- **Module 3**: Linear Motion Systems
-- **Module 4**: CNC Control System & Electronics
+### Foundation Modules (1-4)
+- **Module 1**: Mechanical Frame & Structure
+- **Module 2**: Vertical Axis & Z-Stage
+- **Module 3**: Linear Motion
+- **Module 4**: Control Electronics
 
-### Tool-Specific Modules
-- **Module 5**: CNC Plasma Systems
-- **Module 6**: Spindle Systems (Routers & Mills)
-- **Module 7**: Fiber Laser Cutting Systems
-- **Module 8**: Water Jet Cutting Systems
+### Tool-Specific Modules (5-8)
+- **Module 5**: Plasma Cutting
+- **Module 6**: Spindle & Rotary Tools
+- **Module 7**: Fiber Laser
+- **Module 8**: Waterjet Cutting
 
-### Advanced Systems
-- **Module 9**: Pick & Place Robotic Systems
-- **Module 10**: Robotic Arm Integration
-- **Module 11**: Large-Format FDM Printers
-- **Module 12**: Hybrid Water Jet/Laser Systems
+### Advanced Systems (9-10)
+- **Module 9**: Pick & Place Robot
+- **Module 10**: Robotic Arm
 
-### Control & Programming
-- **Module 13**: EMI/EMC & Electrical Safety
-- **Module 14**: LinuxCNC HAL Components & Real-Time Integration
-- **Module 15**: G-Code Programming & Optimization
-- **Module 16**: CAD/CAM & Design for Manufacturing (DFM)
+### Professional Modules (21-26)
+- **Module 21**: Metrology and Precision Measurement
+- **Module 22**: Quality Management Systems (QMS)
+- **Module 23**: Shop Organization and Management
+- **Module 24**: L.E.A.N. Strategies for CNC Manufacturing
+- **Module 25**: Work-Life Balance in CNC Manufacturing
+- **Module 26**: CNC Business Ownership and Management
 
-### Supplementary Materials
-- **Course Foreword**: Vision and inspirational message
-- **Course Acknowledgments**: Contributors and community
-- **Course Changelog**: Updates and version history
-- **Course License**: CC BY-SA 4.0 details
-- **Course Appendix**: Reference materials, glossary, troubleshooting
+### Appendices
+- **Appendix A-P**: Material Properties, Hardware Specs, Motor Sizing, Linear Motion, Electrical Standards, G-code Reference, Safety Standards, Lubrication, Conversions, Troubleshooting, Vendors, Resources, Glossary, Contact, Updates, Mathematics
+- **Appendix S**: L.E.A.N. Manufacturing Templates (2,910 lines)
+- **Appendix T**: Business Ownership Templates (6,612 lines)
+
+**Total**: 26 Comprehensive Modules + 18 Appendices
 
 ---
 
