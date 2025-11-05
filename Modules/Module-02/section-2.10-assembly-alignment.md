@@ -1,0 +1,497 @@
+# Section 2.10 – Assembly and Alignment
+
+## Overview
+
+Precision assembly and alignment of vertical axis components determines achievable accuracy and long-term reliability. This section provides systematic procedures for column installation, linear rail tramming, ball screw alignment, and final system verification.
+
+## Pre-Assembly Preparation
+
+### Base/Frame Verification
+
+**Critical mounting surface requirements:**
+- Flatness: 20 µm over mounting area
+- Perpendicularity to X-Y plane: 50 µm/m
+- Surface finish: 3.2 µm Ra or better
+- Tapped holes: Clean threads, proper depth
+
+**Inspection procedure:**
+1. Place precision granite square or angle plate on base
+2. Indicate mounting surface flatness (sweep in grid pattern)
+3. Check perpendicularity with precision square and indicator
+4. Verify hole locations against drawing (±0.1mm tolerance)
+5. Clean and degrease mounting surface
+
+**If surface not within specification:**
+- Scrape or hand-grind high spots
+- Re-machine if deviation >100 µm
+- Use shims only as last resort (reduces rigidity)
+
+### Component Inspection
+
+**Inspect all components before assembly:**
+
+**Column:**
+- Rail mounting surfaces flat (10 µm target)
+- Ball screw mounting faces parallel and square
+- No burrs, damage, or debris
+- Protective coatings removed from precision surfaces
+
+**Linear rails:**
+- Check rail straightness with comparator (±5 µm)
+- Inspect for damage during shipping
+- Verify carriage preload by hand feel (smooth, consistent resistance)
+- Rails match as set (often marked L/R or 1/2)
+
+**Ball screw:**
+- Bearing seats clean and undamaged
+- Thread runout <10 µm TIR (check with indicator)
+- Couplings inspected, set screws present
+
+### Tools Required
+
+**Precision instruments:**
+- Dial indicator (0.001mm / 0.5 µm resolution)
+- Magnetic base and extensions
+- Precision parallel (ground to ±2 µm)
+- Granite angle plate (reference surface)
+- Feeler gauges (metric, 0.02-1.0mm)
+
+**Installation tools:**
+- Torque wrench (accurate to ±4%)
+- Allen key set (quality, no rounding)
+- Soft-face mallet (assembly)
+- Degreaser and lint-free wipes
+- Grease (specified for bearings and guides)
+
+## Column Installation
+
+### Step 1: Position and Level
+
+**Mounting the column to base:**
+
+1. **Apply thin coat of way oil** to base mounting surface (prevents galling, aids alignment)
+2. **Position column** onto base mounting surface
+   - Use lifting equipment for large columns (>20 kg)
+   - Avoid dropping or impact
+3. **Insert locating dowel pins** (if designed with dowels)
+   - Dowels provide repeatable positioning
+   - Tight slip fit (H7/m6 tolerance typical)
+4. **Check perpendicularity** to base using precision square and indicator
+   - Sweep column face at top and bottom
+   - Target: <25 µm deviation over column height
+5. **Shim if necessary** to achieve perpendicularity
+   - Use precision ground shims (not feeler gauges)
+   - Minimum number of shim locations
+   - Shim entire contact area (not just corners)
+
+### Step 2: Secure Column
+
+**Fastener installation sequence:**
+
+1. **Insert all mounting bolts** finger-tight
+2. **Tighten bolts progressively** in cross-pattern
+   - Start center, work outward
+   - Multiple passes, increasing torque each pass
+3. **Final torque** per specification
+   - M8: 20-25 N·m typical
+   - M10: 40-50 N·m typical
+   - M12: 70-85 N·m typical
+4. **Re-check perpendicularity** after torquing
+   - Torque can distort alignment
+   - If deviation >25 µm, loosen and re-align
+
+**Important:** Use threadlocker (medium-strength, e.g., Loctite 243) on all structural fasteners.
+
+### Step 3: Final Verification
+
+**Column rigidity check:**
+1. Attempt to deflect column by hand at top (reasonable force)
+2. No detectable movement (indicates proper mounting)
+3. If movement detected, check fastener torque and base contact
+
+**Perpendicularity documentation:**
+- Record final indicator readings
+- Document shim locations and thickness
+- Photograph assembly for future reference
+
+## Linear Rail Installation
+
+### Step 1: Rail Mounting Surface Preparation
+
+**Critical step for long-term accuracy:**
+
+1. **Clean mounting surfaces** on column
+   - Remove all oil, debris, protective coatings
+   - Solvent wipe followed by dry wipe
+2. **Inspect flatness** of each rail mounting surface
+   - Sweep with indicator along full length
+   - Target: <10 µm deviation
+   - If >20 µm, surface requires machining or scraping
+3. **Apply thin film of grease** to mounting surface
+   - Prevents corrosion, aids initial alignment
+   - Wipe excess (should be barely visible film)
+
+### Step 2: First Rail Installation
+
+**Establishing reference rail:**
+
+1. **Position first rail** on mounting surface
+   - Align rail length to column travel direction
+   - Center rail on mounting pad
+2. **Insert mounting bolts** finger-tight
+3. **Tram rail** to column reference surface
+   - Place precision parallel against rail side face
+   - Sweep parallel with indicator along full rail length
+   - Adjust rail position to minimize deviation
+   - Target: <20 µm TIR over full length
+4. **Tighten mounting bolts progressively**
+   - Start at center, work toward ends
+   - Torque per rail manufacturer specification (typically 10-15 N·m for HGR15/20)
+5. **Re-check tramming** after torquing
+   - Torque can shift rail
+   - If deviation >20 µm, loosen and repeat
+
+### Step 3: Second Rail Installation (Parallelism)
+
+**Most critical alignment step:**
+
+1. **Install carriages** on first rail
+2. **Position precision parallel** between first and second rail mounting surfaces
+   - Parallel spans between the two rails
+   - Parallel length matches rail spacing
+3. **Position second rail** using parallel as reference
+4. **Indicate parallelism** at multiple positions along rail length
+   - Top, middle, bottom of travel
+   - Adjust second rail until parallel to first rail
+   - Target: <20 µm deviation over full length
+5. **Tighten mounting bolts progressively**
+6. **Final verification:**
+   - Install carriage on second rail
+   - Slide both carriages manually along full travel
+   - Should move smoothly with consistent resistance
+   - Any binding indicates misalignment
+
+**If binding detected:**
+- Loosen second rail
+- Use indicator to find tight spot
+- Adjust rail at that location
+- Re-torque and test
+
+### Step 4: Carriage Installation
+
+**Installing carriages on rails:**
+
+1. **Apply lubricant** to rails (per manufacturer specification)
+2. **Slide carriages** onto rails from end
+   - Do not disassemble carriages (loses preload setting)
+   - Keep carriages oriented correctly (marked "up" or with arrow)
+3. **Distribute carriages** along rail
+   - Space evenly for initial testing
+4. **Install end stops** (prevent carriage from running off rail)
+   - Mechanical stops at both ends of travel
+   - 10-20mm from maximum travel limits
+
+## Ball Screw Installation
+
+### Step 1: Bearing Mounting
+
+**Fixed-end bearing (bottom typical):**
+
+1. **Clean bearing seat** in column
+   - No burrs, debris, or damage
+2. **Install angular contact bearings** per manufacturer instructions
+   - Correct orientation (load side facing thrust direction)
+   - Preload shims if specified
+3. **Install bearing housing**
+   - Torque fasteners per specification
+   - Lock nuts or threadlocker as required
+4. **Check bearing preload** by rotating screw by hand
+   - Should rotate smoothly with slight resistance
+   - Too tight: excessive friction, premature wear
+   - Too loose: backlash, reduced stiffness
+
+**Supported-end bearing (top typical):**
+
+1. **Install radial bearing** (allows thermal expansion)
+   - Bearing free to slide axially
+   - Maintains lateral location only
+2. **Secure bearing housing**
+
+**Center support bearing (if used):**
+- Install after screw positioned
+- Adjust for proper support without binding screw
+
+### Step 2: Ball Screw Alignment
+
+**Critical for smooth motion and long life:**
+
+1. **Position ball screw** in fixed-end bearing
+2. **Check screw runout** at supported end
+   - Place indicator on screw surface near bearing
+   - Rotate screw by hand, observe runout
+   - Target: <10 µm TIR
+3. **Adjust screw position** to minimize runout
+   - Shim bearing housing if necessary
+   - Eccentric bearing mount (if provided) simplifies adjustment
+4. **Secure supported-end bearing**
+5. **Install ball nut** onto screw
+   - Lubricate with specified grease
+   - Do not disassemble nut (loses ball preload)
+
+### Step 3: Coupling Installation
+
+**Motor-to-screw coupling:**
+
+1. **Align motor shaft** to ball screw
+   - Motor mounted to column or carriage
+   - Shafts collinear (no angular or parallel offset)
+2. **Measure alignment** with dial indicator
+   - Rotate both shafts, observe TIR on each
+   - Angular misalignment: <0.05mm TIR
+   - Parallel offset: <0.1mm
+3. **Install flexible coupling**
+   - Helical beam coupling recommended (accommodates slight misalignment)
+   - Set screws on flats (not threads)
+   - Torque set screws per coupling specification
+4. **Verify alignment** after coupling installed
+   - Rotate motor shaft by hand
+   - Smooth rotation, no binding or vibration
+
+**Important:** Rigid couplings require near-perfect alignment (<0.02mm). Use flexible couplings for easier assembly and better tolerance of thermal expansion.
+
+## Carriage Assembly and Mounting
+
+### Ball Nut to Carriage
+
+**Connecting ball nut to moving carriage:**
+
+1. **Position carriage** at mid-travel
+2. **Attach ball nut** to carriage plate
+   - Ball nut flange typically bolted to carriage bottom
+   - Use washers to distribute load
+   - Torque bolts evenly (cross-pattern)
+3. **Check that carriage moves freely** when screw rotated
+   - If binding: Check rail parallelism and screw alignment
+   - Screw must be parallel to rails (no skew)
+
+### Carriage Perpendicularity
+
+**Ensure carriage perpendicular to column:**
+
+1. **Mount precision angle plate** to carriage
+2. **Indicate against column reference surface**
+   - Sweep indicator across carriage face
+   - Adjust carriage mounting (if slotted holes provided)
+   - Target: <25 µm deviation across carriage width
+3. **Tighten carriage mounting bolts**
+
+## Counterbalance Installation
+
+### Gas Spring Mounting
+
+**Typical configuration for small-medium machines:**
+
+1. **Identify mounting points**
+   - Fixed end: Column or frame
+   - Moving end: Carriage
+2. **Install gas spring** per manufacturer orientation
+   - Piston rod down (oil stays at cylinder head)
+   - Mounting clevis with pivot pins
+3. **Verify force balance**
+   - With motor de-energized and brake released (use caution—support carriage)
+   - Carriage should hold position at mid-travel
+   - Slight upward bias acceptable (±5%)
+4. **Adjust if necessary**
+   - Swap gas spring for different force rating
+   - Add/remove mass from carriage if adjustable
+
+### Pneumatic Counterbalance
+
+**For larger machines:**
+
+1. **Connect pneumatic cylinder** to air supply
+2. **Install pressure regulator** in line
+3. **Set pressure** to balance carriage weight
+   - Starting point: P = F / A (force divided by piston area)
+   - Fine-tune by testing motion balance
+4. **Lock regulator setting** after adjustment
+
+## System-Level Alignment Checks
+
+### Runout Verification
+
+**Spindle-to-table alignment:**
+
+1. **Mount dial indicator** in spindle (if spindle installed)
+2. **Sweep indicator** against flat surface on table
+3. **Move Z-axis** over full travel while observing indicator
+4. **Record runout:** Should be <50 µm for general milling, <25 µm for precision
+5. **If excessive runout:**
+   - Check column perpendicularity to base
+   - Verify rail parallelism
+   - Inspect ball screw alignment
+
+### Travel Limits
+
+**Verify full Z-axis travel:**
+
+1. **Jog carriage** to bottom limit (manually or with motor)
+2. **Note position** (use DRO or mark reference)
+3. **Jog to top limit**
+4. **Measure total travel** and compare to specification
+5. **Set software limits** in control system
+   - Soft limits 5-10mm inside mechanical limits
+   - Prevents crashes
+
+### Backlash Measurement
+
+**Check system backlash:**
+
+1. **Mount dial indicator** against carriage (reading Z-direction)
+2. **Jog Z-axis upward** 10mm, zero indicator
+3. **Command Z-axis downward** 10mm (observe when indicator begins moving)
+4. **Backlash = commanded distance before indicator moves**
+5. **Acceptable values:**
+   - General purpose: <50 µm
+   - Precision: <20 µm
+   - Ultra-precision: <5 µm
+6. **If excessive backlash:**
+   - Check ball nut preload (adjustable on some screws)
+   - Inspect coupling for play
+   - Verify rail carriage preload
+
+## Cable Management Installation
+
+### Cable Carrier Mounting
+
+**Per Section 2.9 guidelines:**
+
+1. **Mount fixed end** of carrier
+   - Top of column or frame (for top-mount configuration)
+   - Rigid mounting bracket
+   - Strain relief for cables exiting carrier
+2. **Mount moving end** to carriage
+   - Secure bracket to carriage plate
+   - Flexible conduit for last 150mm to components
+3. **Route cables** through carrier
+   - Power on one side, signal on other (EMI separation)
+   - Secure cables every 200-300mm inside carrier
+   - Maintain bend radius (≥10× largest cable diameter)
+4. **Test full travel**
+   - Move carriage through full range
+   - Verify carrier moves smoothly, no snagging
+   - Check cable strain relief at both ends
+
+## Documentation
+
+### Assembly Record
+
+**Document final configuration:**
+- Shim locations and thicknesses
+- Fastener torque values and sequence
+- Alignment measurements (parallelism, perpendicularity, runout)
+- Counterbalance force and setting
+- Lubrication type and locations
+- Photos of critical areas
+
+**Purpose:** Enables future troubleshooting, maintenance, and rebuilds.
+
+### Alignment Report
+
+**Create measurement record:**
+```
+Z-Axis Alignment Report
+-----------------------
+Date: __________
+Technician: __________
+
+Column Perpendicularity:
+  - X-axis: _____ µm deviation over _____ mm height
+  - Y-axis: _____ µm deviation over _____ mm height
+
+Rail Parallelism:
+  - Rail 1 to column reference: _____ µm TIR
+  - Rail 2 to Rail 1: _____ µm deviation
+
+Ball Screw Alignment:
+  - Runout at fixed end: _____ µm TIR
+  - Runout at supported end: _____ µm TIR
+  - Coupling alignment: _____ µm offset
+
+System Performance:
+  - Total Z travel: _____ mm
+  - Spindle runout over travel: _____ µm
+  - Backlash: _____ µm
+  - Counterbalance force: _____ N (target: _____ N)
+
+Notes:
+_______________________________________
+```
+
+## Common Assembly Issues
+
+### Rail Binding
+
+**Symptom:** Carriage difficult to move, uneven resistance
+
+**Causes:**
+- Rails not parallel (most common)
+- Mounting surface not flat
+- Over-torqued mounting bolts (distorts rail)
+- Debris under rail
+
+**Solution:**
+1. Loosen all rail mounting bolts
+2. Check mounting surface flatness
+3. Re-tram rails with precision parallel
+4. Torque bolts progressively, re-check after each pass
+5. Test carriage motion frequently during assembly
+
+### Ball Screw Binding
+
+**Symptom:** Rough rotation, tight spots, motor stalling
+
+**Causes:**
+- Screw not aligned to rails (skewed)
+- Bearing over-preloaded
+- Coupling misalignment
+- Ball nut to carriage mounting stressed
+
+**Solution:**
+1. Check screw-to-rail parallelism (should be within 0.1mm over travel)
+2. Verify bearing preload (should rotate smoothly by hand)
+3. Re-check coupling alignment
+4. Loosen ball nut mounting, verify free rotation, re-torque gently
+
+### Excessive Runout
+
+**Symptom:** Spindle runout >50 µm over Z travel
+
+**Causes:**
+- Column not perpendicular to base
+- Rails not parallel
+- Column deflection under carriage weight
+
+**Solution:**
+1. Re-check column perpendicularity, shim if needed
+2. Verify rail tramming
+3. If deflection issue, stiffen column (Section 2.3) or reduce moving mass
+
+## Key Takeaways
+
+1. **Base flatness and perpendicularity** are foundation for all subsequent alignment
+2. **Rail tramming** requires precision parallel and indicator—target <20 µm parallelism
+3. **Rail parallelism** critical: Binding indicates misalignment
+4. **Ball screw runout** should be <10 µm TIR at bearing seats
+5. **Coupling alignment** prevents premature bearing wear (use flexible coupling)
+6. **Counterbalance verification** before motor tuning (release brake, observe balance)
+7. **System-level checks** validate component assembly (runout over travel, backlash)
+8. **Documentation** enables future maintenance and troubleshooting
+9. **Progressive torquing** prevents distortion (cross-pattern, multiple passes)
+10. **Test frequently** during assembly: Small adjustments easier than complete disassembly
+
+***
+
+**Next**: [Section 2.11 – Testing and Commissioning](section-2.11-testing-commissioning.md)
+
+**Previous**: [Section 2.9 – Cable Management](section-2.9-cable-management.md)

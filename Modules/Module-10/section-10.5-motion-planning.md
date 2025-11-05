@@ -1,0 +1,520 @@
+# 10.5 Motion Planning and Control
+
+Motion planning determines how the robot moves between positions efficiently, smoothly, and safely while respecting joint limits, avoiding collisions, and achieving desired tool paths.
+
+## Control Architecture
+
+**Hierarchical Control Structure**
+
+Task Level:
+- High-level goals (pick part, weld seam, assemble component)
+- Sequence of operations
+- Decision logic
+
+Path Planning Level:
+- Generate trajectory (positions over time)
+- Collision checking
+- Optimization (time, smoothness, energy)
+
+Trajectory Generation Level:
+- Convert path to joint space commands
+- Velocity and acceleration profiling
+- Interpolation between waypoints
+
+Servo Control Level:
+- PID or advanced control loops
+- Individual joint control
+- Update rate: 1-4 kHz typical
+
+## Coordinate Space Selection
+
+### Joint Space Motion
+
+**Characteristics**
+- Each joint moves independently from start to end angle
+- Path in Cartesian space not controlled (tool may follow curved path)
+- Simple inverse kinematics (only at endpoints)
+- Fastest motion between points
+
+**Applications**
+- Pick and place (path doesn't matter, only start/end)
+- Retract motions
+- Moving to home position
+
+**Programming**
+```
+MOVEJ P1 SPEED=50%  ; Joint space move to position 1
+```
+
+**Advantages**
+- No singularity issues
+- Fastest execution
+- Simple computation
+
+**Disadvantages**
+- Tool path unpredictable
+- May cause collisions if obstacles present
+
+### Cartesian Space Motion (Linear)
+
+**Characteristics**
+- Tool moves in straight line from start to end
+- Constant orientation (or linearly interpolated)
+- Requires inverse kinematics at every timestep
+- Smooth, predictable tool path
+
+**Applications**
+- Welding seams
+- Gluing beads
+- Cutting paths
+- Assembly approach/retract
+
+**Programming**
+```
+MOVEL P1 SPEED=500 mm/s  ; Linear move to position 1
+```
+
+**Interpolation**
+
+Position:
+```
+P(t) = P_start + (P_end - P_start) × t
+```
+Where t = normalized time (0 to 1)
+
+Orientation:
+- SLERP (Spherical Linear Interpolation) for quaternions
+- Ensures smooth rotation
+
+**Challenges**
+- May encounter singularities along path
+- Joint velocities may exceed limits near singularities
+- Computationally intensive (continuous inverse kinematics)
+
+### Circular Motion
+
+**Application**
+- Arc welding
+- Rounded corners
+- Smooth blending
+
+**Definition**
+- Three points define circle (start, via, end)
+- Or center, start, angle
+
+**Programming**
+```
+MOVEC VIA_P, END_P SPEED=300 mm/s  ; Circular move through via point to end
+```
+
+**Interpolation**
+- Calculate circle parameters from three points
+- Generate points along arc
+- Inverse kinematics for each point
+
+## Trajectory Generation
+
+### Velocity Profiling
+
+**Trapezoidal Profile**
+
+Phases:
+1. Acceleration (constant a)
+2. Constant velocity (v_max)
+3. Deceleration (constant a)
+
+If distance too short for v_max:
+- Triangular profile (accelerate then immediately decelerate)
+
+**S-Curve Profile (Smoother)**
+
+Jerk-Limited:
+- Acceleration increases smoothly
+- Reduces vibration and wear
+- Longer motion time than trapezoidal
+
+Phases:
+1. Jerk (increasing acceleration)
+2. Constant acceleration
+3. Jerk (decreasing acceleration)
+4. Constant velocity
+5. (Reverse for deceleration)
+
+**Multi-Joint Coordination**
+
+Synchronized Motion:
+- Scale velocities so all joints finish simultaneously
+- Smooth coordinated motion
+
+Master-Slave:
+- One joint (master) runs at full capability
+- Others (slaves) scaled to finish at same time
+
+### Time-Optimal Trajectory
+
+**Objective**: Minimize motion time while respecting limits
+
+Constraints:
+- Joint velocity limits: θ̇_i ≤ v_max,i
+- Joint acceleration limits: θ̈_i ≤ a_max,i
+- Torque limits (dynamic)
+
+Algorithm:
+- Phase plane method
+- Dynamic programming
+- Numerical optimization
+
+Result:
+- Each joint runs at limit for portions of trajectory
+- Complex velocity profiles
+- Typically 10-30% faster than simple profiling
+
+## Path Planning
+
+### Point-to-Point Planning
+
+Simple Case:
+- Start and end positions only
+- No intermediate constraints
+- Joint space or Cartesian linear
+
+**Obstacle Avoidance via Via Points**
+
+Define intermediate positions:
+```
+MOVEJ HOME
+MOVEJ APPROACH_1
+MOVEL PICK_POS
+MOVEL APPROACH_1
+MOVEJ APPROACH_2
+MOVEL PLACE_POS
+```
+
+Via points guide robot around obstacles.
+
+### Continuous Path Planning
+
+**For Welding, Cutting, Dispensing**
+
+Requirements:
+- Smooth, continuous tool path
+- Constant orientation or programmed rotation
+- Velocity control (affects process quality)
+
+**Spline Interpolation**
+
+Cubic Splines:
+- Smooth curve through waypoints
+- Continuous velocity and acceleration
+- Adjustable tension/smoothness
+
+B-Splines:
+- Curve influenced by but doesn't pass through all control points
+- Smoother than cubic splines
+- Used in CAD/CAM path generation
+
+**Path Smoothing (Blending)**
+
+Sharp Corners:
+- Stop at waypoint, change direction (slow)
+
+Blended Corners:
+- Round corner with specified radius
+- Don't stop at waypoint
+- Faster, smoother
+
+```
+MOVEL P1 BLEND=10mm  ; Blend within 10mm of P1
+MOVEL P2 BLEND=10mm
+MOVEL P3  ; Stop at P3
+```
+
+### Collision Avoidance
+
+**Static Obstacles**
+
+Known Environment:
+- Pre-defined keep-out zones
+- Robot model includes tool geometry
+- Path planner checks all configurations along path
+
+Methods:
+- Swept volume calculation
+- Discrete configuration checking
+- Distance field methods
+
+**Dynamic Collision Checking**
+
+Real-Time Monitoring:
+- Safety-rated laser scanners
+- Vision-based workspace monitoring
+- Detect humans or moving obstacles
+- Slow or stop robot as needed
+
+**Self-Collision**
+
+Links Interfering:
+- Possible in complex poses or long tools
+- Check during path planning
+- Joint limits may prevent some self-collisions
+
+### Advanced Path Planning
+
+**Sampling-Based Planners**
+
+RRT (Rapidly-Exploring Random Tree):
+- Randomly sample configurations
+- Build tree from start toward goal
+- Fast, probabilistically complete
+- Used in complex environments
+
+PRM (Probabilistic Roadmap):
+- Build graph of collision-free configurations
+- Query for paths between start/goal
+- Pre-computation for known environment
+
+**Optimization-Based**
+
+Minimize Cost Function:
+- Path length
+- Smoothness (jerk)
+- Energy consumption
+- Joint wear
+
+Subject to Constraints:
+- Collision-free
+- Kinematic limits
+- Dynamic limits
+
+## Control Algorithms
+
+### PID Control (Per Joint)
+
+**Structure**
+```
+u(t) = Kp×e(t) + Ki×∫e(t)dt + Kd×de(t)/dt
+```
+
+Where:
+- e(t) = error (desired - actual position)
+- Kp = proportional gain
+- Ki = integral gain
+- Kd = derivative gain
+- u(t) = control output (torque command)
+
+**Tuning**
+
+Proportional (Kp):
+- Higher Kp: Faster response, stiffer
+- Too high: Oscillation, instability
+
+Integral (Ki):
+- Eliminates steady-state error
+- Compensates for gravity, friction
+- Too high: Overshoot, oscillation
+
+Derivative (Kd):
+- Damping (resists velocity)
+- Smooths response
+- Sensitive to noise
+
+Methods:
+- Ziegler-Nichols
+- Manual tuning
+- Auto-tuning algorithms (commercial controllers)
+
+**Feed-Forward**
+
+Add Gravity Compensation:
+```
+u = u_PID + u_gravity
+```
+
+Gravity torque calculated from:
+- Link masses and centers of gravity
+- Current joint angles (from kinematics)
+
+Reduces PID error, improves tracking.
+
+### Advanced Control
+
+**Computed Torque Control**
+
+Full Dynamics Model:
+```
+τ = M(θ)θ̈ + C(θ,θ̇)θ̇ + G(θ)
+```
+
+Where:
+- M(θ) = inertia matrix
+- C(θ,θ̇) = Coriolis and centrifugal forces
+- G(θ) = gravity vector
+
+Linearizes system, allows aggressive control.
+
+Requires:
+- Accurate robot model (mass, inertia)
+- High computational power
+- Typically implemented in high-end controllers
+
+**Adaptive Control**
+
+Parameters Adjust Online:
+- Payload changes (gripper empty vs. holding part)
+- Wear and friction changes
+- Temperature effects
+
+Methods:
+- Model reference adaptive control (MRAC)
+- Self-tuning regulators
+
+**Impedance Control**
+
+Target Behavior:
+```
+M×(ẍ_actual - ẍ_desired) + B×(ẋ_actual - ẋ_desired) + K×(x_actual - x_desired) = F_external
+```
+
+Mimics mass-spring-damper system:
+- M = virtual mass
+- B = virtual damping
+- K = virtual stiffness
+- F_external = measured external force
+
+Applications:
+- Assembly (compliant insertion)
+- Contact tasks (deburring, polishing)
+- Human-robot interaction (safe, compliant)
+
+Requires:
+- Force/torque sensor
+- High update rate control loop
+
+## Singularity Handling
+
+**Detection**
+
+Jacobian Matrix:
+- Maps joint velocities to TCP velocities
+- Singular when determinant near zero
+
+Condition Number:
+- Measure of proximity to singularity
+- High value indicates near-singular
+
+**Avoidance Strategies**
+
+Path Planning:
+- Route around singular configurations
+- Add via points to guide path
+
+Joint Limits:
+- Restrict joint ranges to exclude singularities
+- Example: Limit wrist joint to 10° to 170° (avoid 0° and 180°)
+
+**Damped Least Squares**
+
+Numerical Method:
+- Regularize inverse kinematics near singularities
+- Allows motion through singularity with small path deviation
+
+Trade-off:
+- Path accuracy vs. singularity handling
+
+## Real-Time Considerations
+
+**Control Loop Frequency**
+
+Typical Rates:
+- Position loop: 1-4 kHz
+- Velocity loop: 10-20 kHz (in drive)
+- Current loop: 20-50 kHz (in drive)
+
+Requirements:
+- Deterministic timing (real-time OS)
+- Sufficient computational power
+- Low-latency communication (EtherCAT, etc.)
+
+**Communication Architecture**
+
+Master-Slave:
+- Robot controller (master) sends commands
+- Servo drives (slaves) execute
+- Synchronous updates
+
+Protocols:
+- EtherCAT: 1 kHz to 10 kHz cycle rate
+- PROFINET IRT: Similar performance
+- CAN bus: Lower performance, simpler
+
+**Trajectory Buffering**
+
+Look-Ahead:
+- Controller buffers upcoming trajectory
+- Allows velocity optimization through corners
+- Prevents starvation (waiting for next command)
+
+Streaming:
+- External PC sends trajectory points continuously
+- Controller interpolates and executes
+- Used for complex paths (CAM-generated)
+
+## Calibration
+
+**Kinematic Calibration**
+
+Sources of Error:
+- Link length tolerances
+- Joint zero position errors
+- Encoder mounting misalignment
+- Compliance and deflection
+
+Measurement:
+- Laser tracker or CMM
+- Measure TCP position at many configurations
+- Optimize kinematic parameters to minimize error
+
+Improvement:
+- Accuracy: 0.5mm → 0.1mm typical
+- Depends on robot quality and calibration effort
+
+**TCP Calibration**
+
+Four-Point Method:
+1. Define fixed reference point (sharp tool against stationary pin)
+2. Touch reference from four robot orientations
+3. Controller solves for TCP position (intersection of four spheres)
+
+Automated:
+- Touch probe on robot gripper
+- Probe known artifact (sphere or precision plane)
+- Controller calculates TCP
+
+**Payload Identification**
+
+For Gravity Compensation:
+- Mount known payload (calibration weight)
+- Move through various poses
+- Measure joint currents/torques
+- Identify payload mass and center of gravity
+
+Improves:
+- Tracking accuracy
+- Energy efficiency
+- Torque headroom
+
+***
+
+**Next**: [10.6 Force Control and Compliance](section-10.6-force-control.md)
+
+---
+
+## References
+
+1. **ISO 10218-1:2011** - Robots and robotic devices - Safety requirements
+2. **ISO 9283:1998** - Manipulating industrial robots - Performance criteria
+3. **Denavit, J. & Hartenberg, R.S. (1955).** "A Kinematic Notation for Lower-Pair Mechanisms." *ASME Journal of Applied Mechanics*, 22, 215-221
+4. **Craig, J.J. (2017).** *Introduction to Robotics: Mechanics and Control* (4th ed.). Pearson
+5. **Lynch, K.M. & Park, F.C. (2017).** *Modern Robotics*. Cambridge University Press
+6. **ABB Robot Studio Software** - Robot simulation and programming
+7. **KUKA System Software (KSS)** - Robot control and motion planning

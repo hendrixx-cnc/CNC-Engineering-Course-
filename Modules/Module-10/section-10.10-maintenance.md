@@ -1,0 +1,633 @@
+# 10.10 Maintenance
+
+Regular maintenance ensures reliable operation, prevents costly downtime, and extends robot lifespan. This section covers preventive maintenance schedules, common wear items, and best practices.
+
+## Maintenance Schedule
+
+### Daily (Operator Checks)
+
+**Visual Inspection**
+- Check for unusual sounds or vibrations
+- Inspect cables and hoses for visible damage
+- Verify no fluid leaks (oil, grease, hydraulic)
+- Ensure workspace clear of debris
+- Check guarding intact
+
+**Functional Checks**
+- Test emergency stop function
+- Verify normal startup sequence
+- Check teach pendant operation
+- Observe motion smoothness
+
+**Cleanliness**
+- Wipe exterior surfaces
+- Remove chips or debris from robot
+- Clean gripper or tool surfaces
+- Keep work area organized
+
+### Weekly Maintenance
+
+**Cable and Hose Inspection**
+- Check for abrasion or cracks
+- Verify strain reliefs secure
+- Inspect cable carriers (drag chains)
+- Test connector tightness
+
+**Tool and Gripper**
+- Inspect gripper jaws for wear
+- Check vacuum cups (if applicable)
+- Test gripper actuation
+- Verify tool mounting secure
+
+**Sensors**
+- Clean vision system camera lens
+- Check proximity sensor alignment
+- Test force/torque sensor (if equipped)
+- Verify encoder signals
+
+**Safety Systems**
+- Test all interlock switches
+- Verify light curtains unobstructed
+- Check safety mat function
+- Inspect fence and gates
+
+### Monthly Maintenance
+
+**Lubrication**
+- Lubricate grease points per manufacturer schedule
+- Check oil levels (gearboxes if accessible)
+- Apply light oil to cable carriers
+- Lubricate linear axes (if external)
+
+**Mechanical Inspection**
+- Check all visible fasteners (tighten if loose)
+- Inspect belts for wear and tension
+- Listen for bearing noise
+- Verify joint motion smoothness
+
+**Calibration Check**
+- Move to known reference positions
+- Measure accuracy with dial indicator or gauge
+- Compare to baseline measurements
+- Recalibrate if drift >0.1 mm
+
+**Electrical**
+- Inspect control cabinet interior
+- Check for loose connections
+- Verify fan operation and clean filters
+- Inspect motor connections
+
+**Software**
+- Backup robot programs
+- Review error logs
+- Clear old log files
+- Update position data backups
+
+### Quarterly Maintenance (90 Days)
+
+**Detailed Mechanical**
+- Inspect gearbox condition (noise, temperature)
+- Check brake function and wear
+- Measure backlash (should be <0.05mm at TCP)
+- Inspect pneumatic components
+
+**Electrical Testing**
+- Test emergency stop response time
+- Measure motor winding resistance
+- Check encoder signal quality (oscilloscope)
+- Test battery backup (if equipped)
+
+**Gripper Maintenance**
+- Replace worn vacuum cups
+- Inspect pneumatic cylinder seals
+- Calibrate gripper force (if measurable)
+- Check parallel jaw alignment
+
+**Calibration**
+- Full TCP calibration (four-point method)
+- Verify all tool offsets
+- Check work object frames
+- Mastering (joint zero positions if accessible)
+
+### Annual Maintenance (Major Service)
+
+**Gearbox Service**
+- Inspect harmonic drive flexsplines for wear
+- Check planetary gearboxes for backlash
+- Replace gearbox oil (if applicable)
+- Measure gear noise and vibration
+
+**Bearing Inspection**
+- Check all joint bearings for play
+- Listen for roughness or noise
+- Measure bearing temperature under load
+- Replace if excessive wear detected
+
+**Timing Belt Replacement**
+- Replace all timing belts (preventive, every 2000-5000 hours)
+- Inspect pulleys for wear
+- Re-tension and verify alignment
+
+**Cable Replacement**
+- Replace motor and encoder cables (if showing wear)
+- Inspect power cables for damage
+- Check flexible conduits and cable carriers
+
+**Brake Testing**
+- Measure brake holding torque
+- Test brake release/engage timing
+- Inspect brake pads or discs
+- Adjust or replace if worn
+
+**Encoder Verification**
+- Check encoder alignment
+- Verify count accuracy (rotate 360°, check counts)
+- Test index pulse (if incremental)
+- Replace if erratic behavior
+
+**Controller Maintenance**
+- Clean control cabinet thoroughly
+- Replace cooling fans if noisy
+- Check capacitor condition (power supply)
+- Firmware/software updates if available
+
+**Safety System Validation**
+- Complete functional test of all safety functions
+- Measure stop times and distances
+- Verify performance levels maintained
+- Document results
+
+## Lubrication
+
+### Gearbox Lubrication
+
+**Harmonic Drives**
+
+Lubricant:
+- Manufacturer-specified grease
+- Typically NLGI Grade 0 or 1
+- Molybdenum disulfide or lithium-based
+
+Interval:
+- Initial: 200-500 hours
+- Ongoing: 2000-5000 hours (varies by model and load)
+- More frequent if high-duty cycle
+
+Procedure:
+- Remove drain plug (if accessible)
+- Inject grease via grease nipple
+- Rotate joint through full range
+- Wipe excess grease
+- Reinstall drain plug
+
+**Planetary Gearboxes**
+
+Oil Bath:
+- Change oil every 10,000-20,000 hours
+- Use specified viscosity (ISO VG 220 typical)
+- Check oil level and condition
+
+Grease-Packed:
+- Sealed for life or 20,000+ hours
+- Monitor temperature and noise
+- Replace gearbox if signs of failure
+
+### Joint Bearings
+
+**Grease-Lubricated Bearings**
+
+Schedule:
+- Every 2000-5000 hours depending on speed and load
+- More frequent in harsh environments
+
+Grease Type:
+- Lithium or polyurea-based
+- NLGI Grade 2
+- Temperature range: -40°C to 120°C
+- Low noise specification
+
+Application:
+- Remove old grease if accessible
+- Apply fresh grease via grease fitting
+- Rotate joint to distribute
+- Do not over-pack (increases friction)
+
+**Sealed Bearings**
+
+Maintenance:
+- No lubrication possible
+- Monitor for roughness or noise
+- Replace when worn (typically 20,000+ hours)
+
+### Linear Axes and Cable Carriers
+
+**External Linear Guides**
+
+If robot has external linear axes:
+- Oil or grease per guide manufacturer
+- Typically every 100 km of travel or monthly
+- Wipe rails clean first
+- Apply thin, even coat
+
+**Cable Carriers**
+
+Light oil on pivot points:
+- Prevents wear and squeaking
+- Every 6 months
+- Use dry lubricant in dusty environments
+
+## Wear Items and Replacement
+
+### Consumables
+
+**Vacuum Cups**
+
+Inspection:
+- Check for cracks, tears, or hardening
+- Test suction with vacuum gauge
+- Replace if grip force reduced
+
+Lifespan:
+- 6-12 months typical
+- Shorter if handling abrasive parts
+- Keep spares on hand
+
+**Gripper Jaws**
+
+Soft Jaws:
+- Urethane pads: 6-12 months
+- Rubber: 3-6 months
+- Depends on part characteristics
+
+Hard Jaws:
+- Machined aluminum: Years
+- Replace if damaged or worn
+
+**Timing Belts**
+
+Inspection:
+- Check for cracks on tooth surface
+- Look for fraying at edges
+- Measure belt tension
+
+Replacement:
+- Preventive: Every 2000-5000 hours
+- Immediate if damage visible
+- Replace both belt and idlers
+
+**Filters**
+
+Control Cabinet Air Filters:
+- Check monthly
+- Replace when clogged or dirty
+- Typically every 3-6 months
+
+Pneumatic Filters:
+- Drain daily
+- Replace element every 6-12 months
+
+### Components with Limited Life
+
+**Flexsplines (Harmonic Drives)**
+
+Lifespan:
+- 3,000 to 10,000 hours typical
+- Depends on torque, speed, and reversals
+
+Symptoms of Wear:
+- Increased backlash
+- Positioning errors
+- Unusual noise
+- Higher motor current
+
+Replacement:
+- Requires gearbox disassembly
+- Factory service or experienced technician
+- Replace with OEM parts
+
+**Brakes**
+
+Wear Items:
+- Friction pads or discs
+- Springs (set brakes)
+
+Inspection:
+- Measure holding torque (should meet spec)
+- Check brake engagement time
+- Listen for unusual noise
+
+Replacement:
+- Every 10,000-50,000 actuations
+- Or when holding torque drops below spec
+
+**Batteries (Controller Backup)**
+
+Purpose:
+- Maintain encoder position memory
+- Preserve programs during power loss
+
+Replacement:
+- Every 1-3 years
+- Typically lithium 3.6V cells
+- Low battery warning from controller
+
+Procedure:
+- Power on robot controller
+- Replace battery while powered (preserves data)
+- Or backup/restore after battery change
+
+**Cooling Fans**
+
+Lifespan:
+- 30,000-50,000 hours (3-6 years continuous)
+- Bearings wear out
+
+Symptoms:
+- Noisy operation
+- Reduced airflow
+- Overheat alarms
+
+Replacement:
+- Standard 120mm or 80mm fans
+- Match voltage (24V DC or 120V AC)
+- Verify CFM rating
+
+## Encoders and Feedback
+
+### Encoder Maintenance
+
+**Cleaning**
+
+Optical Encoders:
+- Keep code disc clean (if exposed)
+- Use compressed air only
+- Never touch disc surface
+
+Magnetic Encoders:
+- Less sensitive to contamination
+- Wipe sensor head if accessible
+
+**Alignment Verification**
+
+Symptoms of Misalignment:
+- Erratic position readings
+- Intermittent errors
+- Following error alarms
+
+Check:
+- Encoder coupling for looseness
+- Alignment between motor and encoder shafts
+- Mounting security
+
+**Signal Quality**
+
+Test with Oscilloscope:
+- Channels A and B should be clean square waves
+- 90° phase shift between A and B
+- Amplitude within specification (typically 5V or differential)
+
+Poor Signals Indicate:
+- Contamination
+- Misalignment
+- Cable damage
+- Failing encoder
+
+### Encoder Battery Replacement
+
+**Absolute Encoders with Battery Backup**
+
+Purpose:
+- Maintain position data during power loss
+- Avoid re-mastering (homing)
+
+Procedure:
+1. Note current position data (backup)
+2. Power on controller
+3. Replace battery while powered (no data loss)
+4. Verify position retained
+5. Or: Replace battery unpowered, then re-master
+
+**Mastering Procedure (if position lost)**
+
+Different per manufacturer:
+1. Mechanical mastering: Move to physical reference marks
+2. Electronic mastering: Use master tool or controller function
+3. Store new zero positions in controller
+
+Critical:
+- Mastering errors cause positioning errors
+- Follow manufacturer procedure exactly
+- Verify with test program after mastering
+
+## Calibration Maintenance
+
+### TCP Calibration Verification
+
+**Procedure**
+
+1. Jog robot to known reference point from four different orientations
+2. Measure variation in reference point position
+3. Variation should be <0.1 mm
+4. If larger, re-calibrate TCP
+
+**Automated Calibration**
+
+Some systems:
+- Touch probe on robot
+- Probe calibrated artifact (sphere, plane)
+- Controller calculates TCP automatically
+
+### Payload Calibration
+
+**Purpose**
+
+Accurate payload data improves:
+- Motion control (feedforward compensation)
+- Collision detection sensitivity
+- Energy efficiency
+
+**Update When**
+
+- Tool or gripper changed
+- Payload significantly different
+- Poor motion quality observed
+
+**Method**
+
+1. Mount tool with known mass and center of gravity
+2. Run identification routine (moves through poses, measures currents)
+3. Controller calculates payload parameters
+4. Store in tool data
+
+## Preventive Maintenance Best Practices
+
+### Record Keeping
+
+**Maintenance Log**
+
+Document:
+- Date and time
+- Maintenance performed
+- Parts replaced
+- Measurements taken
+- Technician name
+- Next service due
+
+**Trend Monitoring**
+
+Track over time:
+- Positioning accuracy
+- Backlash measurements
+- Motor currents
+- Temperature
+- Cycle times
+
+Detect degradation before failure.
+
+**Parts Inventory**
+
+Maintain Stock:
+- Critical spares (gripper jaws, vacuum cups)
+- Long-lead items (gearboxes, motors)
+- Consumables (filters, belts, grease)
+
+Track:
+- Part numbers
+- Quantity on hand
+- Reorder levels
+- Vendor and lead time
+
+### Condition-Based Maintenance
+
+**Vibration Monitoring**
+
+Baseline Measurement:
+- When robot new or after maintenance
+- Measure at each joint
+
+Periodic Checks:
+- Monthly or quarterly
+- Increased vibration indicates bearing wear
+
+**Current Monitoring**
+
+Normal Operating Current:
+- Record baseline for each joint
+- Higher current indicates friction or binding
+- Lower current may indicate belt slippage
+
+**Temperature Monitoring**
+
+Thermal Camera:
+- Check gearbox and motor temperatures
+- Hot spots indicate problems
+- Typical: 40-60°C above ambient
+
+### Scheduled Downtime
+
+**Planning**
+
+Coordinate with Production:
+- Schedule major maintenance during planned shutdowns
+- Avoid unscheduled breakdowns
+- Bundle tasks to minimize downtime
+
+**Critical Spare Parts**
+
+Keep on Site:
+- Motors (base, shoulder joints)
+- Gearboxes (most critical joints)
+- Cables (motor power, encoder, teach pendant)
+- Controller backup or spare boards
+
+## Software Maintenance
+
+### Program Backups
+
+**Frequency**
+
+Daily or Weekly:
+- Automated backup to network drive
+- Versioned backups (keep last 10)
+
+After Changes:
+- Immediately after program modifications
+- Before firmware updates
+- Before major maintenance
+
+**Backup Contents**
+
+- All robot programs
+- Position data (taught points)
+- Tool and work object calibrations
+- Configuration files
+- Safety parameters
+
+**Storage**
+
+Multiple Locations:
+- On robot controller
+- Network server
+- USB drive or external media
+- Off-site backup
+
+### Firmware Updates
+
+**When to Update**
+
+Good Reasons:
+- Bug fixes for known issues
+- New features needed
+- Security patches
+
+Caution:
+- If system working well, consider not updating
+- Test on non-production robot first
+- Have rollback plan
+
+**Procedure**
+
+1. Backup everything (programs, configs)
+2. Read release notes thoroughly
+3. Verify compatibility (robot model, options)
+4. Schedule downtime
+5. Perform update
+6. Test all functions
+7. Verify programs run correctly
+8. Keep previous firmware available for rollback
+
+### Controller Maintenance
+
+**Hard Drive / SSD**
+
+Industrial Controller:
+- Hard drive lifespan: 5-7 years
+- SSD more reliable (10+ years)
+
+Preventive:
+- Replace hard drive every 5 years
+- Image backup before replacement
+- Some systems: Compact Flash or SD card (replace every 3 years)
+
+**Battery Backup (CMOS)**
+
+Controller PC Motherboard:
+- CR2032 battery
+- Replace every 2-3 years
+- Prevents BIOS settings loss
+
+---
+
+**Next**: [10.11 Troubleshooting](section-10.11-troubleshooting.md)
+
+---
+
+## References
+
+1. **ISO 10218-1:2011** - Robots and robotic devices - Safety requirements
+2. **ISO 9283:1998** - Manipulating industrial robots - Performance criteria
+3. **Denavit, J. & Hartenberg, R.S. (1955).** "A Kinematic Notation for Lower-Pair Mechanisms." *ASME Journal of Applied Mechanics*, 22, 215-221
+4. **Craig, J.J. (2017).** *Introduction to Robotics: Mechanics and Control* (4th ed.). Pearson
+5. **Lynch, K.M. & Park, F.C. (2017).** *Modern Robotics*. Cambridge University Press
+6. **ABB Robot Studio Software** - Robot simulation and programming
+7. **KUKA System Software (KSS)** - Robot control and motion planning

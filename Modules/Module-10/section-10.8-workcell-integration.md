@@ -1,0 +1,708 @@
+# 10.8 CNC and Workcell Integration
+
+Integrating robotic arms with CNC machines and other equipment creates flexible manufacturing cells. This section covers communication protocols, coordination strategies, and complete workcell design.
+
+## Integration Architectures
+
+### Standalone Robot + CNC
+
+**Independent Controllers**
+
+Configuration:
+- Robot has dedicated controller
+- CNC has separate controller
+- Communication via digital I/O or network
+- Each system runs independently
+
+Coordination Methods:
+- Handshaking signals (simple I/O)
+- Serial communication (RS-232)
+- Industrial Ethernet (Modbus TCP, EtherCAT)
+
+Advantages:
+- Maximum flexibility
+- Standard equipment (no custom integration)
+- Easily expandable
+
+Disadvantages:
+- More complex programming
+- Synchronization limited to signal exchange
+- No true motion coordination
+
+### PLC-Coordinated Cell
+
+**Central Control**
+
+PLC as Master:
+- Controls robot, CNC, conveyors, fixtures
+- Ladder logic or structured text programming
+- Sequences operations
+- Manages production flow
+
+Communication:
+- PLC to robot: Ethernet/IP, PROFINET, or I/O
+- PLC to CNC: Similar industrial protocols
+- HMI connects to PLC
+
+Advantages:
+- Centralized logic
+- Standard factory automation approach
+- Good for multi-machine cells
+- Familiar to maintenance staff
+
+Disadvantages:
+- Additional hardware cost
+- PLC programming expertise required
+- Another point of failure
+
+### Integrated Control
+
+**Single Controller**
+
+Rare Configuration:
+- One controller manages robot and CNC axes
+- Examples: CNC with robotic arm add-on
+
+Advantages:
+- Synchronized motion possible
+- Single programming environment
+- Reduced hardware
+
+Disadvantages:
+- Limited vendor options
+- Less flexible
+- Specialized knowledge required
+
+## Communication Protocols
+
+### Digital I/O (Hardwired)
+
+**Signal Types**
+
+CNC Outputs → Robot Inputs:
+- Cycle complete (CNC finished machining)
+- Door open (safe for robot entry)
+- Part present (part in fixture)
+- Ready for load/unload
+- Error/fault
+
+Robot Outputs → CNC Inputs:
+- Part loaded (robot placed workpiece)
+- Part unloaded (robot removed part)
+- Robot busy (do not close door)
+- Load/unload complete
+- Robot error/fault
+
+**Electrical Interface**
+
+Voltage Levels:
+- 24V DC (most common industrial standard)
+- Sinking vs. sourcing I/O
+- Verify compatibility between devices
+
+Wiring:
+- Shielded cable for noise immunity
+- Separate from power cables
+- Terminal blocks for connections
+- Fused or protected circuits
+
+**Handshaking Sequence Example**
+
+Machine Tending:
+1. CNC completes part, signals "Cycle Complete"
+2. CNC opens door, signals "Door Open"
+3. Robot detects signals, signals "Robot Busy"
+4. Robot enters work area, unloads finished part
+5. Robot loads new workpiece
+6. Robot exits, signals "Part Loaded" and clears "Robot Busy"
+7. CNC closes door
+8. CNC starts machining cycle
+
+Timing:
+- Typical: 5-20 second robot cycle
+- CNC may take 2-10 minutes
+- Robot waits for CNC completion
+
+**Advantages**
+- Simple, reliable
+- No special protocols
+- Easy troubleshooting (multimeter)
+
+**Disadvantages**
+- Limited data (only on/off signals)
+- Many wires for complex cells
+- No feedback beyond binary states
+
+### Serial Communication
+
+**RS-232**
+
+Characteristics:
+- Point-to-point (one-to-one)
+- Distance: Up to 15 meters
+- Speed: 9600 to 115200 baud typical
+- Simple protocol
+
+Message Format (Example):
+```
+Robot → CNC: "READY\r\n"
+CNC → Robot: "LOAD_PART\r\n"
+Robot → CNC: "LOADING\r\n"
+Robot → CNC: "LOAD_COMPLETE\r\n"
+CNC → Robot: "START_CYCLE\r\n"
+```
+
+Applications:
+- Send part numbers or programs
+- Request status information
+- Transmit measurement data
+
+**RS-485**
+
+Characteristics:
+- Multi-drop (one-to-many)
+- Distance: Up to 1200 meters
+- Higher noise immunity than RS-232
+- Requires termination resistors
+
+Use:
+- Multiple devices on one bus
+- Fieldbus protocols (Modbus RTU)
+
+### Industrial Ethernet
+
+**Modbus TCP**
+
+Overview:
+- Client-server model
+- Read/write registers and coils
+- Simple, widely supported
+
+Implementation:
+```python
+from pymodbus.client import ModbusTcpClient
+
+client = ModbusTcpClient('192.168.1.100')
+client.write_coil(0, True)  # Signal start
+status = client.read_coils(10, 1)  # Read complete flag
+client.close()
+```
+
+Data Types:
+- Coils: Binary outputs (write)
+- Discrete inputs: Binary inputs (read)
+- Holding registers: 16-bit read/write
+- Input registers: 16-bit read-only
+
+**EtherCAT**
+
+Characteristics:
+- Real-time deterministic communication
+- Microsecond synchronization
+- Ring or line topology
+- Specialized hardware required
+
+Applications:
+- Coordinated multi-axis motion
+- High-speed I/O
+- Advanced robot systems
+
+Performance:
+- Update rate: 1-10 kHz
+- Jitter: <1 μs
+
+**PROFINET**
+
+Industrial Ethernet:
+- Similar to EtherCAT (real-time variant: PROFINET IRT)
+- Standard Ethernet hardware with PROFINET stack
+- Common in Siemens PLCs
+
+**Ethernet/IP**
+
+CIP Protocol:
+- Used by Allen-Bradley/Rockwell
+- Standard Ethernet
+- Moderate performance (not hard real-time)
+
+**OPC UA**
+
+Modern Standard:
+- Platform-independent
+- Secure (encryption, authentication)
+- Supports complex data structures
+- Growing adoption in Industry 4.0
+
+Example:
+```python
+from opcua import Client
+
+client = Client("opc.tcp://192.168.1.100:4840")
+client.connect()
+node = client.get_node("ns=2;i=10")  # Part count
+value = node.get_value()
+client.disconnect()
+```
+
+## CNC Machine Tending
+
+### Door Control
+
+**Automatic Door Opening**
+
+Methods:
+- Robot triggers door open signal (if CNC supports)
+- Robot physically opens manual door (handle gripper)
+- Door already open (no door, or permanent access)
+
+Integration:
+- Interlock: Robot cannot enter while CNC running
+- Safety circuit: Door open disables CNC spindle
+- Sensor confirms door fully open
+
+**Gripper vs. Door Actuator**
+
+Robot Gripper Opens Door:
+- Special gripper or tool changer to door handle gripper
+- Flexible but slow
+
+Pneumatic/Electric Actuator:
+- Dedicated door opener
+- Robot signals actuator
+- Faster and more reliable
+
+### Part Handling
+
+**Workpiece Loading**
+
+Gripper Design:
+- Grips raw stock securely
+- Clearance for fixture or chuck
+- Release after placement
+
+Fixture Interfaces:
+- Vise jaws (manual or pneumatic)
+- Chuck (pneumatic or hydraulic)
+- Vacuum table
+- Custom fixture with clamps
+
+Loading Sequence:
+1. Approach position (above fixture, offset)
+2. Lower to load position
+3. Place part (may require force control for seating)
+4. Signal fixture to clamp (I/O to CNC or PLC)
+5. Wait for clamp confirmation
+6. Open gripper
+7. Retract
+
+**Part Flipping**
+
+Multi-Operation Machining:
+- Machine OP1 (one side)
+- Robot unloads, flips 180°
+- Robot reloads for OP2 (other side)
+
+Challenges:
+- Gripper must access part from both orientations
+- Flipping fixture or two grippers (tool change)
+- Registration for precise alignment
+
+**Part Identification**
+
+Methods:
+- Barcode/QR code reading (camera on robot)
+- RFID tags on fixture or pallet
+- Manual operator input
+
+Use:
+- Select appropriate CNC program
+- Track part serial numbers
+- Routing (different part types to different machines)
+
+### Process Integration
+
+**CNC Program Selection**
+
+Automatic Selection:
+- Robot identifies part type
+- Robot signals program number to CNC
+- CNC loads correct program
+
+Implementation:
+- Modbus write to program number register
+- Serial command (depends on CNC control)
+- PLC intermediary
+
+**Tool Offset Updates**
+
+From Measurement:
+- Robot measures part dimension (touch probe)
+- Calculates required tool offset
+- Sends offset to CNC
+- CNC adjusts subsequent parts
+
+**Chip Management**
+
+Challenges:
+- Chips on part prevent accurate placement
+- Chip buildup in fixture
+
+Solutions:
+- Air blast (robot-mounted nozzle)
+- Brush station (robot sweeps part)
+- High-pressure coolant washdown
+- Vacuum pickup station
+
+## Multi-Machine Cells
+
+### Single Robot, Multiple CNCs
+
+**Layout**
+
+Linear:
+- Machines in row
+- Robot on floor or rail
+- Simple accessibility
+
+U-Shape:
+- Machines around robot
+- Compact footprint
+- Robot centered for equal reach
+
+**Scheduling**
+
+Fixed Sequence:
+- Robot visits Machine 1, then 2, then 3, repeat
+- Simple, predictable
+- May leave machines idle
+
+Dynamic Priority:
+- Service machine with longest wait first
+- Or machine closest to completion
+- Better utilization
+
+Optimization:
+- Minimize robot travel time
+- Balance CNC cycle times
+- Buffer parts to smooth variations
+
+**Buffer Stations**
+
+Part Queues:
+- Input queue (raw stock ready to load)
+- Output queue (finished parts awaiting pickup)
+- Intermediate buffers between operations
+
+Design:
+- Gravity-fed racks
+- Pallet stands
+- Conveyor sections
+
+Benefits:
+- Smooth production flow
+- Decouple machine cycles
+- Allow robot to service multiple machines efficiently
+
+### Robot on Rail
+
+**Linear Seventh Axis**
+
+Configuration:
+- Robot mounted on linear slide
+- Extends reach horizontally
+- Serves machines along line
+
+Specifications:
+- Rail length: 5-30 meters typical
+- Speed: 1-3 m/s
+- Positioning accuracy: ±0.5-2 mm
+- Servo or rack-and-pinion drive
+
+Programming:
+- Seventh axis coordinated with robot
+- Positions robot at each machine station
+- May move during robot operation for long parts
+
+### Dual-Arm Cells
+
+**Two Robots**
+
+Independent:
+- Each robot has own tasks
+- Coordinate via signals (collision avoidance)
+
+Collaborative:
+- Hold part together
+- One positions, other machines/assembles
+- Complex coordination required
+
+**Workspace Sharing**
+
+Safety Zones:
+- Define exclusive zones (only one robot at a time)
+- Shared zones (collision monitoring required)
+- Handoff zones (part transfer)
+
+Collision Avoidance:
+- Signal-based (Robot 1 in Zone A → Robot 2 waits)
+- Real-time monitoring (laser scanners)
+- Simulation verification
+
+## Auxiliary Equipment
+
+### Part Conveyors
+
+**Input Conveyor**
+
+Function:
+- Delivers raw stock to robot
+- May include part separation or orientation
+
+Integration:
+- Sensor detects part arrival
+- Signals robot to pick
+- Conveyor stops or robot tracks moving part
+
+**Output Conveyor**
+
+Function:
+- Carries finished parts away
+- May route to inspection, packaging, or storage
+
+Integration:
+- Robot places part on conveyor
+- Conveyor sensor confirms placement
+- Accumulation zone for batch collection
+
+### Part Washers
+
+**Purpose**
+- Remove chips and coolant
+- Clean parts for inspection or assembly
+
+**Integration**
+
+Transfer:
+- Robot loads part into washer
+- Washer cycles (spray, rinse, dry)
+- Robot unloads clean part
+
+Timing:
+- Washer cycle: 1-5 minutes typical
+- Robot continues serving other machines
+- Returns when wash complete
+
+### Inspection Stations
+
+**CMM or Vision Inspection**
+
+Process:
+1. Robot picks part from CNC
+2. Robot presents part to CMM or camera
+3. Measurement system inspects dimensions
+4. Results logged and communicated
+5. Pass: Robot places in accept bin
+6. Fail: Robot places in reject bin or rework
+
+**In-Process Measurement**
+
+Touch Probe on Robot:
+- Measure part while in fixture
+- Quicker than separate station
+- Less accurate than dedicated CMM
+
+Data Feedback:
+- Send measurements to CNC for offset adjustment
+- SPC charting and trend analysis
+
+### Tool Changers and Racks
+
+**Tool Magazine**
+
+Multiple End Effectors:
+- Different grippers for part types
+- Process tools (welding, grinding)
+- Inspection tools (probe, camera)
+
+Automatic Tool Change:
+- Robot docks at tool rack
+- Releases current tool
+- Picks new tool
+- Loads tool parameters (TCP, mass)
+
+Benefits:
+- Flexibility (handle multiple part types)
+- Reduces downtime (vs. manual changes)
+- Enables complex processes
+
+## Cell Control Software
+
+### Supervisory Control
+
+**Function**
+
+Cell Controller:
+- Coordinates robot, CNCs, conveyors, etc.
+- Production scheduling
+- Part tracking
+- Data logging
+
+Implementation:
+- Industrial PC running custom software
+- PLC with SCADA/HMI
+- Commercial MES (Manufacturing Execution System)
+
+**Communication**
+
+To Equipment:
+- Robot: Ethernet (OPC UA, Modbus)
+- CNC: MTConnect, Modbus, proprietary
+- PLC: Industrial Ethernet
+- Sensors: I/O, Ethernet
+
+**Features**
+
+Production Scheduling:
+- Queue of jobs (part types and quantities)
+- Assign to machines
+- Optimize throughput
+
+Part Tracking:
+- Serial numbers or batch IDs
+- Which machine, which operation
+- Quality data association
+- Genealogy and traceability
+
+Reporting:
+- Machine utilization (OEE - Overall Equipment Effectiveness)
+- Cycle times
+- Downtime and reasons
+- Quality metrics
+
+### HMI (Human-Machine Interface)
+
+**Operator Interface**
+
+Display:
+- Current status (running, waiting, error)
+- Part counts (produced, remaining)
+- Cycle time
+- Alarms and messages
+
+Controls:
+- Start/stop production
+- Select part program
+- Reset errors
+- Manual jog (with appropriate safety)
+
+**Remote Monitoring**
+
+Access:
+- Web interface or mobile app
+- View status from anywhere
+- Alerts via email or SMS
+
+## Workcell Design Best Practices
+
+### Layout Optimization
+
+**Accessibility**
+
+Robot Placement:
+- Maximize useful workspace
+- Minimize travel distance
+- Avoid reaching over obstacles
+
+Operator Access:
+- Loading feedstock
+- Unloading finished parts
+- Maintenance and troubleshooting
+
+Service Access:
+- Clear paths for technicians
+- Access to control panels
+- Room for forklift/pallet jack
+
+**Safety Compliance**
+
+Guarding:
+- Physical barriers around robot workspace
+- Interlocked gates for operator access
+- Separation from traffic areas
+
+Visibility:
+- Clear sightlines for monitoring
+- Good lighting
+- Status indicators visible
+
+### Workflow Optimization
+
+**Material Flow**
+
+One-Way Flow:
+- Raw material in one side
+- Finished parts out opposite side
+- Minimize cross-traffic
+
+Minimize Handling:
+- Direct transfer where possible
+- Avoid intermediate storage unless buffering needed
+
+**Cycle Time Balance**
+
+Bottleneck Analysis:
+- Identify slowest operation (limits throughput)
+- Option 1: Speed up bottleneck
+- Option 2: Add parallel capacity
+- Option 3: Rebalance tasks
+
+Utilization:
+- Keep high-value equipment (CNCs) running maximum time
+- Robot idle time acceptable if CNCs fully utilized
+
+### Maintenance Considerations
+
+**Accessibility**
+
+Design for Maintenance:
+- Easy access to wear items (grippers, tool changers)
+- Removable panels
+- Service positions (clear area for major work)
+
+Spare Parts:
+- Storage nearby
+- Quick-change designs
+- Minimize downtime
+
+**Utilities**
+
+Power Distribution:
+- Adequate capacity
+- Clean power for controls
+- Emergency shutoff accessible
+
+Compressed Air:
+- Filtration and regulation
+- Adequate flow for all pneumatic devices
+- FRL (Filter, Regulator, Lubricator) per device or zone
+
+Network:
+- Separate control network (isolated from office)
+- Managed switches
+- Proper grounding and shielding
+
+***
+
+**Next**: [10.9 Safety Systems](section-10.9-safety-systems.md)
+
+---
+
+## References
+
+1. **ISO 10218-1:2011** - Robots and robotic devices - Safety requirements
+2. **ISO 9283:1998** - Manipulating industrial robots - Performance criteria
+3. **Denavit, J. & Hartenberg, R.S. (1955).** "A Kinematic Notation for Lower-Pair Mechanisms." *ASME Journal of Applied Mechanics*, 22, 215-221
+4. **Craig, J.J. (2017).** *Introduction to Robotics: Mechanics and Control* (4th ed.). Pearson
+5. **Lynch, K.M. & Park, F.C. (2017).** *Modern Robotics*. Cambridge University Press
+6. **ABB Robot Studio Software** - Robot simulation and programming
+7. **KUKA System Software (KSS)** - Robot control and motion planning

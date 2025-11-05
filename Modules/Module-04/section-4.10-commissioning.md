@@ -1,0 +1,389 @@
+## 10. Commissioning & Diagnostics
+
+### 10.1 Introduction: The Critical Transition from Build to Operation
+
+Commissioning transforms a mechanically assembled CNC machine into a functioning precision motion system. This phase systematically validates each subsystem—power supplies, motion controllers, drives, encoders, safety interlocks—before attempting coordinated multi-axis motion. A structured commissioning process prevents damage to expensive components (servo drives cost $300-$1,500 each), identifies wiring errors safely, and establishes baseline performance metrics for future troubleshooting.
+
+**Safety-First Philosophy:** The first action in any commissioning procedure is verifying E-stop functionality. Per ISO 13849-1 Category 3 requirements (see Section 6.2), the E-stop circuit must reliably remove power from drives before attempting first motion. Test the E-stop by pressing it, measuring drive bus voltage (should drop to <10V within 50 ms), and verifying that motion commands are ignored. Only after successful E-stop validation should axis motion commence.
+
+**Documentation Requirements:** Maintain a commissioning log documenting:
+- Voltage measurements at critical test points (logic power, drive bus, encoder excitation)
+- Initial PID gain values and tuning iterations
+- Positioning accuracy measurements (ballbar tests, laser interferometry)
+- Fault codes encountered and resolutions
+- Software configuration files (controller INI files, drive parameter backups)
+
+This log serves as the baseline for future maintenance (Section 11) and enables rapid diagnosis when performance degrades. For example, if contouring accuracy is ±0.020 mm at commissioning but degrades to ±0.050 mm after six months, compare current PID gains to baseline values—mechanical wear may have increased friction, requiring retuning.
+
+### 10.2 Pre-Power Checks (Visual and Continuity Testing)
+
+Before applying power, perform systematic checks to catch wiring errors, short circuits, and installation mistakes that could damage electronics.
+
+**Visual Inspection Checklist:**
+1. **Polarity Verification:** Confirm DC power supply polarity matches controller/drive input markings. Reversed polarity destroys MOSFETs instantly. Use colored wire (red = positive, black = negative) and verify with multimeter.
+
+2. **Wiring Torque:** Verify all terminal screws torqued to manufacturer specifications (typically 0.5-0.8 N·m for signal terminals, 1.2-1.5 N·m for power terminals per IEC 60204-1). Loose connections cause arcing and intermittent faults.
+
+3. **Strain Relief:** Check that cables have adequate strain relief at connectors. Vibration-induced wire fatigue is the leading cause of intermittent encoder faults.
+
+4. **Shielding Termination:** Confirm cable shields terminated at single-point earth ground (typically at controller end) per Section 7.1. Double-grounded shields create ground loops causing noise coupling.
+
+**Continuity Testing (Power Off):**
+- **E-Stop Chain:** Measure resistance across E-stop loop with all E-stops released. Should read <1 Ω for Category 3 dual-channel design. Press each E-stop and verify loop opens (>10 MΩ).
+
+- **Limit Switch Wiring:** For normally-closed (NC) hardware limits, measure continuity with switch not actuated (should be <1 Ω). Actuate switch and verify open circuit. Reverse logic for normally-open (NO) home switches.
+
+- **Opto-Isolator Inputs:** Measure forward voltage drop across opto-isolator input (cathode to anode with external excitation). Should read 1.2-1.8V for healthy LED. Open circuit indicates damaged opto-isolator.
+
+**Isolation Testing:**
+Use megohmmeter (500V test voltage) to verify isolation between:
+- Drive power terminals and earth ground: >10 MΩ
+- Motor windings and motor frame: >10 MΩ
+- Logic ground and earth ground: Should be <1 Ω (intentionally bonded at single point)
+
+Low isolation resistance (<1 MΩ) indicates moisture ingress, damaged insulation, or contamination requiring repair before power-on.
+
+### 10.3 Power-On Sequence (Staged Power-Up Procedure)
+
+Never energize all systems simultaneously. Use staged power-up to isolate faults:
+
+**Stage 1: Logic Power Only (5V/12V/24V)**
+1. Enable only the low-voltage DC supplies feeding the motion controller and I/O. Leave drive bus power OFF.
+2. Verify voltage levels at controller:
+   - 5V rail: 4.95-5.05V (±1% regulation per ATX spec)
+   - 12V rail: 11.8-12.2V
+   - 24V rail: 23.5-24.5V
+3. Check current draw. Typical 4-axis system draws 2-4A at 24V for logic (controller, breakout board, I/O). Excessive current (>6A) indicates short circuit.
+4. Confirm controller boots: Watch for status LEDs (power, Ethernet link, boot sequence). LinuxCNC systems display boot messages on VGA output.
+5. Establish communication: Ping Ethernet-based controllers, verify USB enumeration, or check RS-232 handshake for serial interfaces.
+
+**Stage 2: Motor Bus Power (48V/75V) - Drives Disabled**
+1. Enable drive bus power supply but keep drive enable signals LOW (drives in inhibit state).
+2. Measure bus voltage at each drive input: Should match PSU output voltage ±2%. Significant voltage drop indicates wiring resistance or loose connections.
+3. Check quiescent current: Drives in disabled state draw 0.2-0.5A for logic/cooling fans. Excessive current suggests damaged drive.
+4. Verify drive status LEDs indicate "Ready" or "Inhibit" state (green LED typical). Fault LEDs (red) indicate pre-existing errors.
+
+**Stage 3: Enable Drives (No Motion Commands)**
+1. Assert drive enable signals through controller software (e.g., LinuxCNC `setp` command or Mach4 "Reset" button).
+2. Drives transition from inhibit to enabled state. Monitor for fault indications.
+3. Listen for servo holding torque engagement: Quiet click as brake releases (if equipped) or slight hum as current loop engages.
+4. Check encoder feedback: Controller should display current position (may be arbitrary at first power-on). Manually rotate axis—position should change predictably. If position counts backward, encoder A/B signals are swapped.
+
+**Stage 4: Commanded Motion (Slow Manual Jog)**
+1. Select single axis (typically X-axis on horizontal gantry—low inertia, easy to E-stop).
+2. Command slow jog (10-50 mm/min) using controller's manual jog interface.
+3. Verify direction: Positive command should move in +X direction per machine coordinate system. If reversed, invert direction bit in controller configuration or swap motor leads for brushed DC/AC motors.
+4. Monitor following error: Should be <0.05 mm at low speed. Excessive following error indicates inadequate gain or mechanical binding.
+5. Test E-stop: Press E-stop during motion and verify immediate deceleration (<50 ms brake engagement per Section 6.4).
+
+**Voltage Measurement Points:**
+Table 10.1 lists critical test points for troubleshooting power delivery:
+
+| Test Point | Expected Voltage | Fault Indication |
+|------------|------------------|------------------|
+| PSU output (no load) | Vnom ±2% | Low: PSU damaged; High: No load regulation |
+| Drive bus (all drives disabled) | Vnom −1% | >5% drop: Wiring resistance excessive |
+| Drive bus (one drive enabled, static) | Vnom −2 to −5% | >10% drop: PSU undersized or wiring fault |
+| Drive bus (all drives enabled, rapid motion) | Vnom −5 to −10% | >15% drop: PSU inadequate, see Section 5.2 |
+| Encoder 5V excitation | 4.90-5.10V | <4.8V: Excessive load or PSU fault |
+| Logic 24V (I/O active) | 23.5-24.5V | <23V: PSU overload, check I/O short circuits |
+
+**Fault Indicator Interpretation:**
+Modern drives provide multi-color status LEDs:
+- **Green solid:** Ready/enabled, no faults
+- **Green flashing:** Inhibit mode (normal for Stage 2)
+- **Yellow/amber:** Warning (over-temperature approaching limit, following error approaching threshold)
+- **Red solid:** Fault condition (over-current, over-voltage, encoder loss, following error exceeded)
+- **Red flashing:** Critical fault requiring power cycle (internal drive error, watchdog timeout)
+
+Consult drive manual for fault code retrieval (typically via software interface or LED blink patterns). Common codes:
+- E01/E02: Over-current (short circuit, motor fault, inadequate tuning causing oscillation)
+- E03: Over-voltage (regenerative energy during deceleration without braking resistor, see Section 5.3)
+- E04: Under-voltage (PSU sagging under load, loose wiring)
+- E05: Over-temperature (inadequate cooling, see Section 8)
+- E06: Encoder fault (wiring break, noise, incompatible encoder)
+
+### 10.4 Axis Tuning Procedures (PID and Feedforward Tuning)
+
+Servo tuning optimizes the trade-off between response speed (tracking fast motion commands) and stability (avoiding oscillation). The cascaded position-velocity-current loop structure (Section 4.3) requires tuning from innermost loop outward: current loop first (usually factory-tuned), then velocity loop, finally position loop.
+
+**Step 1: Open-Loop Verification**
+Before closing the position loop, verify that commanded motion produces expected motor response:
+1. Configure controller for open-loop mode (disable position feedback, velocity loop only).
+2. Command small velocity (e.g., 10 mm/s for ball screw with 5 mm lead → 120 RPM).
+3. Verify motor rotates smoothly at commanded speed. Stalling or jerky motion indicates wiring fault, inadequate current limit, or mechanical binding.
+4. Measure actual velocity with tachometer or encoder. Deviation >10% suggests incorrect velocity scaling constant (encoder counts per unit or motor KV constant).
+
+**Step 2: Encoder Phasing (Direction Verification)**
+Ensure encoder A/B phase order matches motor direction:
+1. Jog axis slowly (10 mm/min) in +X direction.
+2. Observe encoder position counter. Should increase for +X motion. If decreases, either:
+   - Swap encoder A and B signals, or
+   - Invert motor direction (swap motor leads for DC motors, set direction inversion bit for drives with direction input)
+3. Repeat for all axes. Consistent phasing prevents positive feedback (commanded +X produces −X motion, causing runaway).
+
+**Step 3: PID Gain Tuning (Ziegler-Nichols Method)**
+The position loop PID controller applies torque correction based on following error $e(t) = x_{\text{cmd}}(t) - x_{\text{actual}}(t)$:
+
+$$
+T_{\text{cmd}}(t) = K_p \cdot e(t) + K_i \int_0^t e(\tau) \, d\tau + K_d \frac{de(t)}{dt}
+$$
+
+Where:
+- $K_p$ (proportional gain): Immediate response to error. Units: (N·m)/mm for torque output, or (mm/s)/mm = 1/s for velocity output.
+- $K_i$ (integral gain): Eliminates steady-state error by accumulating error over time. Units: (N·m)/(mm·s) or 1/s².
+- $K_d$ (derivative gain): Damping term responding to rate of error change. Units: (N·m·s)/mm or unitless.
+
+**Tuning Procedure:**
+1. **Start conservatively:** Set $K_p = 1$ (if units are 1/s), $K_i = 0$, $K_d = 0$. For drives with gain in (A/mm), scale by motor torque constant $K_T$ (N·m/A).
+
+2. **Increase $K_p$ until oscillation:** Command step motion (e.g., 10 mm move). Incrementally increase $K_p$ (multiply by 1.5 each iteration) until axis oscillates at end of move. Note critical gain $K_{p,\text{crit}}$ and oscillation period $T_{\text{osc}}$.
+
+3. **Back off $K_p$ for stability margin:** Set $K_p = 0.45 \cdot K_{p,\text{crit}}$ per Ziegler-Nichols tuning rules for slight overshoot, or $K_p = 0.33 \cdot K_{p,\text{crit}}$ for overdamped (no overshoot) response.
+
+4. **Add integral gain:** Set $K_i = K_p / (0.85 \cdot T_{\text{osc}})$. This eliminates steady-state following error at the cost of slight overshoot. Monitor for integrator windup during long moves—most controllers implement anti-windup limiting integral term accumulation.
+
+5. **Add derivative gain for damping:** Set $K_d = K_p \cdot (0.125 \cdot T_{\text{osc}})$. Derivative gain improves damping but amplifies high-frequency noise. If axis vibrates at high frequency (>100 Hz), reduce $K_d$ or add low-pass filter to derivative term (typical cutoff 50-200 Hz).
+
+**Example 10.1: PID Tuning for X-Axis Ball Screw**
+**Given:**
+- Ball screw lead: 5 mm/rev
+- Motor inertia (rotor + reflected screw): $J = 0.0012$ kg·m²
+- System friction: $F_f = 25$ N
+- Encoder: 2500 PPR (10,000 counts/rev after quadrature) → 0.0005 mm/count
+- Servo drive output: Velocity command (−10V to +10V) → −3000 to +3000 RPM
+- Controller position loop output: Velocity in mm/s
+
+**Calculate:**
+1. **Velocity scaling:** 3000 RPM @ 10V, 5 mm lead → (3000 rev/min × 5 mm/rev) / 60 s/min = 250 mm/s at 10V. Scaling: 25 mm/s per volt.
+
+2. **Initial proportional gain:** Start with $K_p = 1.0$ mm/s per mm error (unitless when velocity output).
+
+3. **Tuning steps:** Command 10 mm step move, increase $K_p$ until oscillation occurs at $K_{p,\text{crit}} = 12$ mm/s per mm. Oscillation period $T_{\text{osc}} = 0.08$ s (12.5 Hz).
+
+4. **Set final gains:**
+   - $K_p = 0.45 \times 12 = 5.4$ mm/s per mm
+   - $K_i = 5.4 / (0.85 \times 0.08) = 79$ mm/s per (mm·s) = 79/s
+   - $K_d = 5.4 \times (0.125 \times 0.08) = 0.054$ mm·s per mm
+
+5. **Verify performance:** Following error at 2 m/min (33.3 mm/s): $e_{\text{ss}} \approx v / K_p = 33.3 / 5.4 = 6.2$ mm without $K_i$. With integral term, $e_{\text{ss}} → 0$ within 0.2 s.
+
+**Step 4: Velocity Feedforward ($K_{ff}$) Tuning**
+Following error during constant-velocity motion can be reduced by adding velocity feedforward:
+
+$$
+v_{\text{cmd}} = K_p \cdot e(t) + K_i \int e(\tau) d\tau + K_{ff} \cdot v_{\text{desired}}(t)
+$$
+
+Where $K_{ff}$ (dimensionless, typically 0.9-1.0) directly commands velocity proportional to desired trajectory velocity, bypassing the error-based correction. This reduces following error from 6 mm to <0.5 mm at high feedrates.
+
+**Tuning $K_{ff}$:** Command constant-velocity move (e.g., 3 m/min). Measure average following error. Increase $K_{ff}$ from 0 to 1.0 in 0.1 increments. Optimal $K_{ff}$ minimizes following error during constant velocity without causing overshoot at direction reversals.
+
+**Step 5: Acceleration Feedforward ($K_{aff}$) for Improved Corner Tracking**
+For applications requiring tight contour following (circular interpolation, complex tool paths), acceleration feedforward compensates for inertia:
+
+$$
+T_{\text{ff}} = K_{aff} \cdot a_{\text{desired}}(t)
+$$
+
+Where $K_{aff}$ has units (N·m·s²)/mm or equivalently kg (since $T = F \cdot r$ and $F = m \cdot a$). $K_{aff}$ approximates total reflected inertia divided by mechanical advantage.
+
+**Tuning $K_{aff}$:** Perform circular interpolation test (G02/G03 command). Measure contouring error with ballbar or laser tracker. Increase $K_{aff}$ until contouring error minimized. Excessive $K_{aff}$ causes overshoot at acceleration transitions.
+
+### 10.5 Resonance Testing (Frequency Sweep and Notch Filters)
+
+Mechanical resonances—natural frequencies where structure vibrates with high amplification—couple into servo control loops causing instability. Resonances originate from:
+- **Structural modes:** Gantry beam bending (30-80 Hz typical, see Module 1 Section 13.4), column bending (50-120 Hz)
+- **Bearing preload:** Excessive preload increases stiffness but creates high-frequency modes (200-400 Hz)
+- **Belt drives:** Fundamental belt resonance $f_n = \frac{1}{2L}\sqrt{T/\mu}$ (Section 3.6.3), typically 10-50 Hz
+
+**Frequency Sweep Method:**
+1. Configure controller to generate sinusoidal position command: $x(t) = A \sin(2\pi f t)$ with amplitude $A = 0.5$ mm and frequency $f$ swept from 1 Hz to 500 Hz.
+2. Measure following error $e(t)$ during sweep using controller's internal diagnostics (LinuxCNC `halscope`, Mach4 Diagnostics screen).
+3. Plot following error magnitude vs. frequency (Bode magnitude plot). Peaks indicate resonances where structure amplifies input command.
+
+**Example 10.2: Identifying Resonance at 87 Hz**
+**Given:**
+- Frequency sweep shows following error peak at $f_{\text{res}} = 87$ Hz with amplification factor $Q = 8$ (following error 8× larger than off-resonance).
+- Resonance identified as gantry beam first bending mode (per Module 1 analysis).
+
+**Design Notch Filter:**
+A digital notch filter attenuates commands near resonant frequency, preventing excitation:
+
+$$
+H(z) = \frac{1 - 2\cos(\omega_0 T_s) z^{-1} + z^{-2}}{1 - 2r\cos(\omega_0 T_s) z^{-1} + r^2 z^{-2}}
+$$
+
+Where:
+- $\omega_0 = 2\pi f_{\text{res}}$ (rad/s): Notch center frequency
+- $T_s$: Servo update period (e.g., 1 ms for 1 kHz servo loop)
+- $r = 1 - \frac{BW}{f_{\text{res}}}$: Pole radius controlling notch bandwidth $BW$ (Hz)
+
+**Calculate:**
+1. Notch center: $\omega_0 = 2\pi \times 87 = 546.6$ rad/s
+2. Servo period: $T_s = 0.001$ s (1 kHz update)
+3. Notch bandwidth: Choose $BW = 10$ Hz (±5 Hz around center) to attenuate without affecting adjacent frequencies
+4. Pole radius: $r = 1 - \frac{10}{87} = 0.885$
+
+5. Filter coefficients:
+   - $a_0 = 1$
+   - $a_1 = -2 \cos(546.6 \times 0.001) = -2 \cos(0.5466) = -1.704$
+   - $a_2 = 1$
+   - $b_1 = -2 \times 0.885 \times \cos(0.5466) = -1.508$
+   - $b_2 = 0.885^2 = 0.783$
+
+6. **Verify attenuation:** At $f = 87$ Hz, notch provides −30 dB attenuation (97% reduction). Repeat frequency sweep with notch enabled—following error peak reduced from 8× to <1.5×.
+
+**Cross-Coupling in Gantry Systems:**
+Dual-drive gantries (two motors driving opposite ends of Y-axis, see Module 1 Section 1.8) require synchronized control to prevent racking. Cross-coupling control adds correction based on position error between drives:
+
+$$
+T_{\text{left}} = T_{\text{base}} + K_c \cdot (x_{\text{right}} - x_{\text{left}})
+$$
+$$
+T_{\text{right}} = T_{\text{base}} - K_c \cdot (x_{\text{right}} - x_{\text{left}})
+$$
+
+Where $K_c$ is cross-coupling gain (N·m/mm). If right side leads left side by 0.1 mm, left motor receives additional torque to catch up. Tune $K_c$ by commanding simultaneous moves and measuring position difference—optimal $K_c$ maintains <0.02 mm difference during acceleration.
+
+### 10.6 Acceptance Testing (Performance Verification)
+
+After tuning, perform quantitative tests to verify machine meets specification. Document results as baseline for future maintenance.
+
+**Positioning Accuracy Test (ISO 230-2 Unidirectional):**
+1. Mount dial indicator (0.001 mm resolution) or laser interferometer at tool mounting point.
+2. Command axis to move to 10 equally spaced positions across travel (e.g., 0, 100, 200, ... 900 mm for 900 mm travel).
+3. Measure actual position at each commanded position. Repeat 3 times.
+4. Calculate mean positioning error $\bar{e}_i$ at each position and maximum error $E_{\text{max}}$.
+
+**Repeatability Test (ISO 230-2):**
+1. Command axis to same position (e.g., 500 mm) 10 times.
+2. Measure actual position each time. Calculate standard deviation $\sigma_x$.
+3. Repeatability $R = 4\sigma_x$ (captures 95% of distribution per ISO definition).
+
+**Circular Interpolation Test (G02/G03 Accuracy):**
+1. Mount ballbar (telescoping bar with LVDTs measuring length variation) between machine spindle and fixed point on table.
+2. Command circular motion (e.g., 150 mm radius at 1000 mm/min).
+3. Ballbar records deviation from perfect circle. Plot polar graph showing overshoot at quadrant transitions (X/Y synchronization error) and radius variation (contouring error).
+
+**Velocity Limits (Maximum Feedrate Without Following Error):**
+1. Command increasing feedrates (1000, 2000, 3000 mm/min) and monitor following error.
+2. Maximum usable feedrate is where following error remains <0.050 mm (or machine specification).
+3. Limiting factors: Inadequate $K_p$ gain, motor torque limit, or acceleration limit.
+
+**Acceleration Limits (Maximum Accel Before Faults):**
+1. Command aggressive moves with increasing acceleration (0.5, 1.0, 2.0 m/s²).
+2. Monitor for over-current faults (motor torque exceeds rating) or following error faults (demanded position change faster than servo can track).
+3. Maximum safe acceleration typically 60-80% of mechanical critical acceleration (ball screw critical speed, belt tensioner bottoming).
+
+**Acceptance Criteria Table:**
+Table 10.2 defines typical acceptance thresholds:
+
+| Parameter | Hobby/DIY | Professional | High-Precision | Test Method |
+|-----------|-----------|--------------|----------------|-------------|
+| Positioning Accuracy | ±0.100 mm | ±0.030 mm | ±0.010 mm | ISO 230-2, laser interferometer |
+| Repeatability | ±0.050 mm | ±0.010 mm | ±0.005 mm | 10-cycle same-position test |
+| Circular Interpolation Error | <0.200 mm | <0.050 mm | <0.020 mm | Ballbar test, 150 mm radius |
+| Following Error (steady-state) | <0.200 mm | <0.050 mm | <0.020 mm | Constant velocity move, halscope |
+| Maximum Feedrate | 5 m/min | 15 m/min | 30 m/min | Commanded move without fault |
+| Maximum Acceleration | 0.3 m/s² | 1.0 m/s² | 3.0 m/s² | Aggressive move without over-current |
+
+Machines failing to meet target thresholds require mechanical correction (alignment, bearing preload adjustment, see Module 3 Section 8) or servo retuning before acceptance.
+
+### 10.7 Diagnostic Tools & Techniques
+
+**Oscilloscope for Signal Verification:**
+- **Encoder signals:** Verify quadrature relationship (A leads B for forward motion, 90° phase shift). Check edge rise time (<1 μs for reliable counting at high speed). Noise spikes >20% signal amplitude indicate shielding problems (Section 7.2).
+- **Step/direction signals:** Confirm direction signal setup time (typically >5 μs before step pulse) and hold time per drive datasheet.
+- **PWM drive output:** Measure switching frequency (15-20 kHz typical). Voltage spikes >2× bus voltage indicate inadequate snubbing or gate drive issues.
+
+**Multimeter for Voltage/Current Checks:**
+- **DC bus voltage under load:** Should remain within ±10% of no-load voltage. Excessive droop indicates undersized PSU (Section 5.2) or wiring resistance.
+- **Logic voltages:** 5V rail powering encoders critical—measure at encoder connector (not just PSU output). >0.3V drop indicates excessive wiring resistance or connector corrosion.
+
+**Hall Effect Current Probe for Drive Monitoring:**
+- Clamp around motor phase wire to measure RMS current without breaking circuit.
+- Compare measured current to commanded current (from drive display). Mismatch >10% indicates current sensor calibration drift or damaged current shunt.
+- Peak current during acceleration should not exceed drive continuous rating by >2× (most drives allow 2-3× overload for <2 seconds).
+
+**Software Diagnostic Tools:**
+- **LinuxCNC Halscope:** Real-time oscilloscope for HAL signals (encoder position, following error, PID output). Trigger on following error threshold to capture fault conditions.
+- **Mach4 Diagnostics Screen:** Displays real-time inputs (limit switches, E-stop), outputs (drive enable, coolant), and DRO positions.
+- **Drive manufacturer software:** Many drives (Leadshine, Teknic, Delta) include Windows utilities for real-time parameter monitoring, oscilloscope functions, and fault history.
+
+**Fault Code Interpretation:**
+Log fault codes with context (commanded motion, environmental conditions). Common patterns:
+- **Intermittent encoder faults:** Vibration-induced wiring break. Solution: Reroute cable with additional strain relief, replace damaged encoder.
+- **Over-voltage during deceleration:** Insufficient braking resistor capacity. Solution: Increase resistor power rating (Section 5.3) or reduce deceleration rate.
+- **Following error on specific axis segments:** Mechanical binding (chip accumulation on ways, misaligned rail, loose coupling). Solution: Clean, realign, tighten per Module 3 maintenance procedures.
+
+### 10.8 Common Issues & Solutions (Troubleshooting Decision Tree)
+
+**Issue: Following Error Faults During Motion**
+- **Symptom:** Drive faults with "following error exceeded" during moves. Position lag exceeds threshold (typically 1-5 mm).
+- **Possible Causes:**
+  1. Insufficient PID gain → Increase $K_p$ per Section 10.4
+  2. Mechanical binding (chips, misalignment, loose gib) → Inspect per Module 3 Section 8
+  3. Motor undersized for load → Verify torque calculation Section 4.2, consider larger motor
+  4. Encoder resolution inadequate → Upgrade to higher PPR encoder (2000+ PPR for servo systems)
+- **Diagnostic:** Manually push axis—should move smoothly with 20-50 N force. If requires >100 N, mechanical issue present.
+
+**Issue: Over-Voltage Faults During Rapid Deceleration**
+- **Symptom:** Drive faults during deceleration from high speed. DC bus voltage exceeds drive limit (typically >400V for 48V drives, >800V for 75V drives).
+- **Possible Causes:**
+  1. No braking resistor installed → Add resistor per Section 5.3 sizing
+  2. Braking resistor undersized → Calculate regenerative energy: $E_{\text{regen}} = \frac{1}{2}Jω^2$ where $J$ is inertia, $ω$ is motor speed. Resistor must dissipate energy within duty cycle.
+  3. Deceleration rate too aggressive → Reduce acceleration setting in controller (trade speed for reliability)
+- **Diagnostic:** Monitor bus voltage during deceleration with oscilloscope. Voltage spike >10% above nominal indicates insufficient energy dissipation.
+
+**Issue: Encoder Loss (Position Feedback Fault)**
+- **Symptom:** Drive faults with "encoder error" or position counter freezes/jumps erratically.
+- **Possible Causes:**
+  1. Broken encoder cable (vibration-induced fatigue) → Replace cable, add strain relief
+  2. Noise coupling on encoder signals → Improve shielding (Section 7.2), add ferrite beads, verify single-point ground
+  3. Encoder power supply voltage low (<4.8V) → Check voltage at encoder, reduce cable length, increase wire gauge
+  4. Encoder mechanically damaged (bearing failure, contamination) → Replace encoder
+- **Diagnostic:** Measure encoder signals with oscilloscope. Clean square waves with 90° phase shift indicate healthy encoder. Rounded edges or noise spikes indicate electrical issues.
+
+**Issue: Random E-Stop Activations (Nuisance Trips)**
+- **Symptom:** E-stop circuit opens unexpectedly without button press. Machine halts mid-operation.
+- **Possible Causes:**
+  1. Electrical noise on safety circuit → Add RC snubber (0.1 μF capacitor + 100 Ω resistor) across safety relay coil
+  2. Loose E-stop button wiring → Inspect connections, torque terminals to specification
+  3. Safety relay contact bounce → Replace relay if contacts worn (>100,000 cycles typical life)
+  4. Induced voltage from nearby VFD → Reroute safety wiring away from motor cables, use shielded cable
+- **Diagnostic:** Monitor E-stop circuit voltage with data logger. Voltage dips <18V (for 24V system) indicate noise coupling or loose connection.
+
+**Troubleshooting Decision Tree:**
+Table 10.3 provides systematic fault diagnosis:
+
+| Fault Code | Primary Cause | Secondary Cause | Diagnostic Test | Solution |
+|------------|---------------|-----------------|-----------------|----------|
+| E01 Over-current | Motor short circuit | Tuning oscillation | Ohmmeter on motor phases | Replace motor or reduce $K_p$ |
+| E03 Over-voltage | No brake resistor | Aggressive decel | Scope bus voltage | Add/upsize resistor |
+| E04 Under-voltage | PSU undersized | Loose wiring | Measure voltage drop | Upsize PSU or rewire |
+| E05 Over-temperature | Inadequate cooling | Excessive duty cycle | Check enclosure temp | Add fans or reduce load |
+| E06 Encoder fault | Cable break | Noise coupling | Scope encoder signals | Replace cable or shield |
+| E07 Following error | Low PID gain | Mechanical binding | Manual axis push test | Increase $K_p$ or fix binding |
+
+**Systematic Approach:**
+1. **Isolate to subsystem:** Is issue electrical (drive fault codes) or mechanical (binding, vibration)?
+2. **Check recent changes:** Did problem start after parameter change, mechanical adjustment, or environmental shift (temperature)?
+3. **Swap components:** If multiple identical axes, swap drives/encoders/motors to determine if fault follows component (component failure) or stays with axis (mechanical/wiring issue).
+4. **Consult documentation:** Reference commissioning log baseline—has performance degraded over time?
+
+Commissioning and diagnostics transform a collection of parts into a reliable production machine. Systematic testing catches problems early when repair is inexpensive, and baseline documentation enables rapid troubleshooting throughout the machine's operational life.
+
+
+---
+
+## References
+
+1. **ISO 230-2:2014** - Test code for machine tools - Positioning accuracy
+2. **ISO 13849-1:2015** - Safety of machinery - Safety-related control systems
+3. **Franklin, G.F., Powell, J.D., & Emami-Naeini, A. (2014).** *Feedback Control of Dynamic Systems* (7th ed.). Pearson
+4. **Ogata, K. (2009).** *Modern Control Engineering* (5th ed.). Pearson
+5. **LinuxCNC Integrator's Manual** (linuxcnc.org) - CNC control configuration
+6. **Mach4 CNC Controller** (machsupport.com) - Software documentation
+7. **FANUC CNC Series Technical Manuals** - Industrial controller specifications
+8. **IEC 61000 Series** - Electromagnetic compatibility (EMC) standards

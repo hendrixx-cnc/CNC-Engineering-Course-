@@ -1,0 +1,648 @@
+# 10.7 Programming and Simulation
+
+Robot programming defines motion sequences, process parameters, and decision logic. This section covers teach pendant programming, offline programming, simulation, and common robot languages.
+
+## Programming Methods
+
+### Teach Pendant Programming
+
+**Hardware**
+
+Teach Pendant:
+- Handheld device with LCD screen
+- Directional jog buttons
+- Numeric keypad
+- Function keys
+- Three-position enabling switch (dead-man)
+
+Connection:
+- Wired to robot controller
+- Wireless options (less common for safety)
+
+**Teaching Process**
+
+1. Enter Manual Mode:
+   - Key switch to "Teach" or "Manual"
+   - Reduces robot speed (typically 250 mm/s max per ISO)
+   - Enabling switch must be held
+
+2. Jog Robot:
+   - Joint mode: Move individual joints
+   - World mode: Move in X, Y, Z of world frame
+   - Tool mode: Move in tool coordinate system
+   - Adjust speed (1-100%)
+
+3. Record Positions:
+   - Move to desired position
+   - Press "Teach" or "Record Point"
+   - System saves position (all joint angles or TCP pose)
+   - Assign point name or number
+
+4. Build Program:
+   - Select motion type (joint, linear, circular)
+   - Select taught points
+   - Set speed and acceleration
+   - Add I/O commands (gripper, process signals)
+
+5. Test and Refine:
+   - Run program at low speed
+   - Verify positions and motions
+   - Adjust as needed
+   - Gradually increase speed
+
+**Advantages**
+- Intuitive, no programming knowledge needed
+- Immediate feedback (see actual robot motion)
+- Easy to adjust positions
+
+**Disadvantages**
+- Time-consuming (robot occupied during teaching)
+- Production downtime
+- Difficult for complex logic or calculations
+- Ergonomically challenging for large programs
+
+### Offline Programming (OLP)
+
+**Concept**
+
+Program Development:
+- Create program on PC away from robot
+- 3D CAD environment
+- Simulate and verify before deployment
+- Download to robot for execution
+
+**Workflow**
+
+1. Import CAD Models:
+   - Robot model (from manufacturer)
+   - Workcell layout (fixtures, machines, obstacles)
+   - Part geometry
+
+2. Define Coordinate Systems:
+   - Robot base frame
+   - Part frame
+   - Tool frame (TCP)
+
+3. Create Path:
+   - Manual point teaching (click in 3D)
+   - Import from CAD (edges, surfaces)
+   - Automatic path generation (tool paths for machining)
+
+4. Add Process Parameters:
+   - Speed, acceleration
+   - I/O signals
+   - Tool changes
+   - Wait commands
+
+5. Simulate:
+   - Visualize robot motion
+   - Check for collisions
+   - Verify cycle time
+   - Optimize trajectory
+
+6. Post-Process:
+   - Convert generic path to robot-specific code
+   - Generate native robot language (KRL, RAPID, etc.)
+
+7. Download and Test:
+   - Transfer program to robot controller
+   - Test at low speed
+   - Fine-tune as needed
+
+**Software Packages**
+
+Commercial:
+- RoboDK: Multi-brand, affordable ($500-$3000)
+- ABB RobotStudio: Free for ABB robots
+- KUKA Sim Pro: For KUKA robots
+- Fanuc RoboGuide: For Fanuc robots
+- Delmia (Dassault): High-end, expensive
+- Process Simulate (Siemens): High-end
+
+Open-Source:
+- ROS MoveIt: Powerful, requires programming
+- OpenRAVE: Research-oriented
+
+**Advantages**
+- No production downtime
+- Complex paths (CAD-driven)
+- Collision detection before deployment
+- Multiple robot brands from single environment
+- Optimization tools
+
+**Disadvantages**
+- Calibration differences (simulation vs. real robot)
+- Learning curve
+- Software cost (for commercial packages)
+- Final on-robot testing still required
+
+### Text-Based Programming
+
+**Robot-Specific Languages**
+
+**KUKA Robot Language (KRL)**
+```krl
+DEF MyProgram()
+  PTP HOME Vel=100% DEFAULT
+  LIN P1 CONT Vel=1.5 m/s TOOL[1] BASE[0]
+  LIN P2 CONT Vel=1.5 m/s
+  LIN P3 Vel=0.5 m/s
+  WAIT SEC 1.0
+  PTP HOME Vel=100%
+END
+```
+
+Features:
+- Pascal-like syntax
+- Data types: INT, REAL, BOOL, POS, FRAME
+- Loops, conditionals, functions
+- Inline motion and I/O
+
+**ABB RAPID**
+```rapid
+PROC Main()
+  MoveJ Home, v1000, z50, Tool0;
+  MoveL p10, v500, z10, Tool1\WObj:=wobj1;
+  MoveL p20, v500, z10, Tool1;
+  WaitTime 0.5;
+  SetDO DO_Gripper, 1;
+  MoveJ Home, v1000, z50, Tool0;
+ENDPROC
+```
+
+Features:
+- Structured, modern syntax
+- Strong typing
+- Built-in motion commands
+- Interrupt handling
+
+**Fanuc KAREL**
+```karel
+PROGRAM MyProgram
+VAR
+  status : INTEGER
+BEGIN
+  MOVE_TO(1, 100)  -- Move to position 1 at 100mm/s
+  WAIT_FOR(DI[1])
+  SET_DO(1, ON)
+  DELAY(500)  -- 500ms
+  MOVE_TO(2, 200)
+END MyProgram
+```
+
+And TP (Teach Pendant) language:
+- Graphical point-and-click style
+- Limited text editing
+
+**Universal Robots URScript**
+```python
+def my_program():
+  movej(home_pose, a=1.4, v=1.05)
+  movel(p[0.3, 0.2, 0.4, 0, 3.14, 0], a=1.2, v=0.25)
+  set_digital_out(0, True)
+  sleep(0.5)
+  movel(p[0.3, 0.2, 0.5, 0, 3.14, 0], a=1.2, v=0.25)
+end
+```
+
+Features:
+- Python-like syntax
+- Simple and accessible
+- Less powerful than industrial languages
+
+**Advantages of Text Programming**
+- Version control (git)
+- Copy/paste, find/replace
+- Complex logic and calculations
+- Automated code generation
+
+**Disadvantages**
+- Requires programming knowledge
+- Less intuitive than teach pendant
+- Syntax varies by manufacturer
+
+### High-Level Languages
+
+**Python with Robot Framework**
+
+ROS (Robot Operating System):
+```python
+import rospy
+from moveit_commander import MoveGroupCommander
+
+rospy.init_node('robot_control')
+arm = MoveGroupCommander('manipulator')
+
+# Move to named pose
+arm.set_named_target('home')
+arm.go()
+
+# Move to Cartesian position
+pose_target = arm.get_current_pose().pose
+pose_target.position.z += 0.1
+arm.set_pose_target(pose_target)
+arm.go()
+```
+
+Advantages:
+- Powerful Python ecosystem
+- Works with multiple robot brands
+- Advanced features (motion planning, perception)
+
+Disadvantages:
+- Setup complexity
+- Not real-time capable (use with caution)
+
+**C++ with Robot SDK**
+
+Some manufacturers provide C++ libraries:
+- More control than scripting
+- Real-time capable
+- Complex integration
+
+## Coordinate Systems and Frames
+
+### Frame Definitions
+
+**Base Frame**
+- Fixed to robot mounting surface
+- Default reference for all motion
+
+**World Frame**
+- User-defined external reference
+- May differ from base (robot mounted at angle, on rail, etc.)
+
+**Tool Frame**
+- Origin at TCP (Tool Center Point)
+- Z-axis typically points out of tool
+- X and Y in tool plane
+
+**Work Object (Part) Frame**
+- Fixed to workpiece or fixture
+- Allows programming relative to part
+- Robot motion compensates for part orientation
+
+### Frame Transformations
+
+**Teaching Frames**
+
+Three-Point Method (Work Object):
+1. Teach origin point
+2. Teach point on X-axis
+3. Teach point in XY-plane
+4. Controller calculates frame transformation
+
+Four-Point Method (Tool TCP):
+- Touch reference point from four orientations
+- Controller solves for TCP position
+
+**Frame Math**
+
+Transform point from tool frame to base frame:
+```
+P_base = T_base_tool × P_tool
+```
+
+Where T is 4×4 homogeneous transformation matrix.
+
+**Programming with Frames**
+
+Advantage:
+- Part programs independent of robot position
+- Move fixture → update frame → program unchanged
+
+Example (ABB RAPID):
+```rapid
+MoveL Offs(p10, 50, 0, 0), v100, fine, Tool1\WObj:=Part1;
+```
+Moves to p10 offset by 50mm in X, all relative to Part1 frame.
+
+## Program Structure
+
+### Modular Programming
+
+**Main Program**
+```kuka
+DEF Main()
+  Initialize()
+  LOOP
+    PickPart()
+    ProcessPart()
+    PlacePart()
+    UpdateCounter()
+  ENDLOOP
+END
+```
+
+**Subroutines**
+```kuka
+DEF PickPart()
+  MoveToApproach(PickLocation)
+  MoveToGrasp(PickLocation)
+  CloseGripper()
+  IF NOT PartPresent() THEN
+    HALT
+  ENDIF
+  Retract()
+END
+```
+
+Benefits:
+- Reusable code
+- Easier debugging
+- Clearer structure
+
+### Variables and Data
+
+**Position Variables**
+```rapid
+VAR robtarget p1 := [[500, 100, 300], [1, 0, 0, 0], [0, 0, 0, 0], [9E9, 9E9, 9E9, 9E9, 9E9, 9E9]];
+```
+
+Components:
+- Position: [X, Y, Z]
+- Orientation: Quaternion [q1, q2, q3, q4]
+- Robot configuration (joint angles that achieve this pose)
+
+**Arrays**
+
+Part Locations:
+```krl
+DECL POS PartLocations[10]
+PartLocations[1] = {X 100, Y 50, Z 20, A 0, B 0, C 0}
+...
+FOR i = 1 TO 10
+  LIN PartLocations[i]
+  ...
+ENDFOR
+```
+
+### Control Flow
+
+**Conditionals**
+```rapid
+IF DI_PartPresent = 1 THEN
+  ProcessPart;
+ELSE
+  WaitForPart;
+ENDIF
+```
+
+**Loops**
+```krl
+FOR i = 1 TO 10
+  PickAndPlace(i)
+ENDFOR
+
+WHILE NOT Done()
+  Step()
+ENDWHILE
+```
+
+**Error Handling**
+```rapid
+VAR errnum err_var;
+...
+GripPart;
+IF ERRNO <> ERR_NO_ERR THEN
+  ! Handle gripper error
+  TPWrite "Gripper failed";
+  Stop;
+ENDIF
+```
+
+## Simulation
+
+### Collision Detection
+
+**Geometric Modeling**
+
+Robot Model:
+- Links represented as meshes or primitive shapes
+- Accurate geometry from CAD
+
+Environment:
+- Fixtures, machines, obstacles
+- Simplified collision geometry (convex hulls, bounding boxes)
+
+**Collision Checking**
+
+Methods:
+- Bounding box intersection (fast, conservative)
+- Mesh-to-mesh distance calculation (accurate, slower)
+- Swept volume (checks entire motion path)
+
+Configuration:
+- Define safety margins (e.g., 10mm clearance)
+- Warning vs. error levels
+- Specific link pairs to check
+
+**Self-Collision**
+
+Robot Against Itself:
+- Cable carriers against base
+- Tool against shoulder
+- Common in complex poses
+
+Prevention:
+- Joint limits
+- Path planning avoidance
+
+### Cycle Time Analysis
+
+**Simulation Benefits**
+
+Accurate Prediction:
+- Run simulated program
+- Measure time for each motion
+- Total cycle time
+
+Bottleneck Identification:
+- Which motions are slowest?
+- Where are dwell times?
+
+Optimization:
+- Adjust speeds
+- Change approach paths
+- Reorder operations
+
+**Comparison**
+
+Simulation vs. Reality:
+- Typically within 5-10% if well-calibrated
+- Acceleration/deceleration details differ
+- Useful for relative comparisons
+
+### Reachability Analysis
+
+**Workspace Verification**
+
+Check All Points:
+- Can robot reach all programmed positions?
+- Any near joint limits?
+- Any singularities?
+
+Visualization:
+- Color code: green (good), yellow (marginal), red (unreachable)
+- Adjust robot placement or part orientation
+
+**Dexterity Analysis**
+
+Manipulability:
+- How far from singularities?
+- How many joint configurations available?
+- Used to optimize robot placement
+
+### Virtual Commissioning
+
+**Digital Twin**
+
+Complete Workcell:
+- Robot, CNC machines, conveyors
+- Control logic (PLC simulation)
+- Part flow and timing
+
+Benefits:
+- Test integration before physical build
+- Identify issues early
+- Train operators on virtual system
+
+**Hardware-in-Loop (HIL)**
+
+Real Controller, Simulated Robot:
+- Connect actual robot controller to simulation
+- Controller thinks it's controlling real robot
+- Test real programs safely
+
+## Path Generation
+
+### CAD-Based Paths
+
+**Surface Machining**
+- Select CAD surface
+- Define tool, stepover, feed rate
+- Generate tool path
+- Convert to robot motion
+
+**Edge Following**
+- Select edges (for welding, gluing, etc.)
+- Define approach/retract
+- Generate continuous path
+
+**Point Grids**
+- Define array of positions (palletizing, inspection)
+- Generate repeated motion pattern
+
+### Teach by Demonstration
+
+**Lead-Through Programming**
+
+Collaborative Robots:
+- Physically move robot through desired path
+- System records positions
+- Playback recorded path
+
+Advantages:
+- Very intuitive (no programming)
+- Good for complex 3D paths
+
+Disadvantages:
+- Limited precision
+- Hard to achieve smooth motion
+- May need refinement
+
+**Kinesthetic Teaching**
+
+Gravity Compensation:
+- Robot becomes weightless (zero-gravity mode)
+- Operator guides robot
+- Record waypoints or continuous path
+
+## Advanced Features
+
+### Conveyor Tracking
+
+**Setup**
+- Encoder on conveyor belt
+- Measures belt position continuously
+- Robot synchronizes motion to moving part
+
+**Programming**
+```rapid
+DropWObj := CnvToObj(WObj_Conveyor);
+MoveL RelTool(p1, 0, 0, -50), v500, z10, Tool1\WObj:=DropWObj;
+MoveL p1, v500, fine, Tool1\WObj:=DropWObj;
+MoveL RelTool(p1, 0, 0, 50), v500, z10, Tool1;
+DropWObj := WObj0;  ! Stop tracking
+```
+
+Applications:
+- Pick from moving conveyor
+- Place on moving line
+- Inspection on moving parts
+
+### Vision Integration
+
+**Vision-Guided Motion**
+
+Process:
+1. Trigger camera capture
+2. Vision system locates part
+3. Sends offset to robot
+4. Robot adjusts programmed position
+
+**Programming**
+```python
+# Trigger camera
+trigger_camera()
+
+# Get offset from vision system
+offset = get_vision_offset()
+
+# Apply offset to nominal position
+actual_pos = nominal_pos + offset
+
+# Move to actual position
+robot.move(actual_pos)
+```
+
+**Calibration**
+
+Camera-to-Robot Transform:
+- Teach robot to several fiducial points
+- Camera measures same points in image
+- Calculate transformation matrix
+
+### Multi-Robot Coordination
+
+**Independent Control**
+- Separate programs
+- Coordinate via I/O signals (handshaking)
+- Simpler but less efficient
+
+**Coordinated Motion**
+- Single controller manages multiple robots
+- Synchronized trajectories
+- Shared workspace management
+- Complex programming
+
+**Example Application**
+- Two robots weld same large part
+- One robot holds part, other welds
+- Coordinated motion required
+
+***
+
+**Next**: [10.8 CNC and Workcell Integration](section-10.8-workcell-integration.md)
+
+---
+
+## References
+
+1. **ISO 10218-1:2011** - Robots and robotic devices - Safety requirements
+2. **ISO 9283:1998** - Manipulating industrial robots - Performance criteria
+3. **Denavit, J. & Hartenberg, R.S. (1955).** "A Kinematic Notation for Lower-Pair Mechanisms." *ASME Journal of Applied Mechanics*, 22, 215-221
+4. **Craig, J.J. (2017).** *Introduction to Robotics: Mechanics and Control* (4th ed.). Pearson
+5. **Lynch, K.M. & Park, F.C. (2017).** *Modern Robotics*. Cambridge University Press
+6. **ABB Robot Studio Software** - Robot simulation and programming
+7. **KUKA System Software (KSS)** - Robot control and motion planning

@@ -1,0 +1,322 @@
+## 4. Core Equations for Structural Behavior: Comprehensive Treatment
+
+### 4.1 Linear Deflection of Beams: Foundation of Machine Tool Structures
+
+The deflection of beams under load is the single most important consideration in machine tool frame design. Almost every structural element—frame tubes, gantry beams, Z-axis columns—behaves primarily as a beam subjected to distributed or concentrated loads.
+
+#### **4.1.1 Simply Supported Beam with Uniform Load**
+
+Consider a beam of length $L$, subject to uniform load $w$ (force per unit length), supported at both ends:
+
+**Maximum deflection** (at mid-span):
+
+$$\delta_{max} = \frac{5 w L^4}{384 E I}$$
+
+**Maximum bending stress** (at mid-span, outer fiber):
+
+$$\sigma_{max} = \frac{w L^2}{8 S}$$
+
+where:
+- $w$ = load intensity (N/mm)
+- $L$ = span (mm)
+- $E$ = Young's modulus (MPa): 200,000 for steel, 69,000 for aluminum
+- $I$ = second moment of area about neutral axis (mm⁴)
+- $S$ = section modulus = $I/c$ where $c$ = distance from neutral axis to outer fiber (mm³)
+
+**Design Procedure:**
+
+Given a maximum allowable deflection $\delta_{allow}$ (typically $L/1000$ to $L/2000$ for machine frames), solve for required $I$:
+
+$$I_{req} = \frac{5 w L^4}{384 E \delta_{allow}}$$
+
+**Practical Example:**
+
+Design a gantry beam to support a 150 kg carriage + Z-axis assembly over a 1,250 mm span, limiting deflection to 0.025 mm:
+
+1. Load: $W = 150 \times 9.81 = 1,471$ N
+2. Uniform equivalent: $w = W/L = 1,471/1,250 = 1.18$ N/mm (approximation; point load analysis is more accurate but conservative)
+3. Material: 6061-T6 aluminum, $E = 69,000$ MPa
+4. Allowable deflection: $\delta_{allow} = 0.025$ mm
+5. Required $I$:
+
+$$I_{req} = \frac{5 \times 1.18 \times 1250^4}{384 \times 69,000 \times 0.025} = \frac{1.44 \times 10^{13}}{6.62 \times 10^{5}} = 2.17 \times 10^{7} \text{ mm}^4$$
+
+**Section Selection:**
+
+Standard aluminum extrusions in the required range:
+- 80 × 80 × 4mm tube: $I_{xx} \approx 1.5 \times 10^{6}$ mm⁴ (insufficient, deflection ~0.36 mm)
+- 100 × 150 × 6mm tube: $I_{xx} \approx 1.2 \times 10^{7}$ mm⁴ (marginal)
+- 120 × 180 × 8mm tube: $I_{xx} \approx 3.5 \times 10^{7}$ mm⁴ (acceptable, deflection ~0.015 mm)
+
+Conclusion: Select 120 × 180 × 8mm or larger, providing ~40% margin.
+
+#### **4.1.2 Cantilever Beam (Critical for Z-Axis Design)**
+
+A cantilever beam, fixed at one end and loaded at the free end with force $F$, deflects according to:
+
+**Tip deflection**:
+
+$$\delta_{tip} = \frac{F L^3}{3 E I}$$
+
+**Maximum bending stress** (at fixed end):
+
+$$\sigma_{max} = \frac{F L}{S}$$
+
+**Required $I$ for specified deflection**:
+
+$$I_{req} = \frac{F L^3}{3 E \delta_{allow}}$$
+
+**Critical observation**: Deflection scales with $L^3$ (vs. $L^4$ for simple support). This means doubling the cantilever length increases deflection by 8×, making long cantilevers exceptionally compliant. This is why Z-axis travel is typically limited to 150–250 mm even when greater range would be useful—longer Z-axes become prohibitively compliant without massive structural sections. See Section 1.3 (Core Equations) for the simply‑supported case.
+
+**Z-Axis Design Example:**
+
+Design a Z-axis column to support 50 kg head weight plus 200 N cutting force, with 180 mm cantilever length, limiting deflection to 0.015 mm:
+
+1. Total force: $F = (50 \times 9.81) + 200 = 690$ N
+2. Material: Steel, $E = 200,000$ MPa
+3. Length: $L = 180$ mm
+4. Required $I$:
+
+$$I_{req} = \frac{690 \times 180^3}{3 \times 200,000 \times 0.015} = \frac{4.02 \times 10^{9}}{9 \times 10^{6}} = 4.47 \times 10^{5} \text{ mm}^4$$
+
+**Section options:**
+- 80 × 80 × 4mm square tube: $I = 9.1 \times 10^{5}$ mm⁴ (acceptable, δ ≈ 0.007 mm)
+- 100 × 100 × 5mm: $I = 2.0 \times 10^{6}$ mm⁴ (conservative, δ ≈ 0.003 mm)
+
+Selection also considers:
+- Mounting provisions for linear guides (requires flat, machinable surfaces)
+- Internal space for ball-screw and wiring
+- Torsional stiffness (for moment loads from offset tools)
+
+#### **4.1.3 Beam Stiffness in Machine Tool Context**
+
+The stiffness $k$ of a beam (force/deflection ratio) depends on loading and support:
+
+| Configuration | Stiffness $k$ | Notes |
+|---------------|---------------|-------|
+| Simply supported, center load | $\frac{48 E I}{L^3}$ | Gantry beam approximation |
+| Cantilever, tip load | $\frac{3 E I}{L^3}$ | Z-axis, overhanging tools |
+| Fixed-fixed, center load | $\frac{192 E I}{L^3}$ | 4× stiffer than simple support |
+| Distributed load | Varies | Use equivalent point load |
+
+**Stiffness Hierarchy Implementation:**
+
+For a machine with:
+- Frame stiffness target: $k_{frame} = 200$ N/µm
+- Gantry target: $k_{gantry} = 50$ N/µm (4:1 hierarchy)
+- Z-axis target: $k_{Z} = 30$ N/µm (1.7:1 hierarchy)
+
+Design each element to meet its target, then verify via FEA that accumulated deflection remains within error budget.
+
+### 4.2 Critical Speed of Ball-Screws: Avoiding Catastrophic Resonance
+
+Ball-screws, like all slender rotating shafts, exhibit **critical speeds**—RPMs at which lateral vibration becomes unstable, leading to destructive resonance. The first critical speed $n_{cr}$ must exceed maximum operating speed by factor of 2–3 minimum.
+
+#### **4.2.1 Fundamental Critical Speed Equation**
+
+For a ball-screw of length $L$ (mm), diameter $d_s$ (mm), with end support stiffness factor $k$:
+
+$$n_{cr} = \frac{4.76 \times 10^6 \cdot k \cdot d_s}{L^2} \quad \text{(RPM)}$$
+
+**End-fixity factor** $k$ depends on mounting:
+
+| Mounting Condition | $k$ value | Typical Application |
+|-------------------|----------|---------------------|
+| Simple-simple | 1.57 | Floating bearing both ends |
+| Fixed-simple | 2.23 | One end radially and axially fixed, one floating |
+| Fixed-fixed | 3.14 | Both ends rigidly clamped |
+
+Most CNC applications use **fixed-simple** mounting: The nut-end bearing is fixed radially and axially (resists thrust), the motor-end bearing is fixed radially but free axially (allows thermal expansion).
+
+#### **4.2.2 Practical Design Example**
+
+Design for Z-axis:
+- Screw length $L = 300$ mm (including bearing-to-bearing distance)
+- Diameter $d_s = 16$ mm
+- Lead $l = 5$ mm/rev
+- Max desired speed: $V = 20$ m/min = 333 mm/s
+
+Required screw RPM for max speed:
+
+$$n = \frac{V}{l/60} = \frac{333}{5/60} = 3,996 \text{ RPM}$$
+
+Critical speed with fixed-simple mounting ($k = 2.23$):
+
+$$n_{cr} = \frac{4.76 \times 10^6 \times 2.23 \times 16}{300^2} = \frac{1.70 \times 10^8}{9 \times 10^4} = 1,889 \text{ RPM}$$
+
+**Problem**: Operating speed (3,996 RPM) exceeds critical speed—unacceptable!
+
+**Solutions**:
+
+1. **Increase diameter**: Try $d_s = 20$ mm:
+   $$n_{cr} = \frac{4.76 \times 10^6 \times 2.23 \times 20}{300^2} = 2,361 \text{ RPM}$$
+   Still insufficient.
+
+2. **Reduce length** with intermediate support bearing at mid-span:
+   Effective length $L = 150$ mm (half)
+   $$n_{cr} = \frac{4.76 \times 10^6 \times 2.23 \times 16}{150^2} = 7,557 \text{ RPM}$$
+   Acceptable (2:1 safety margin)
+
+3. **Reduce operating speed**: Limit to 10 m/min (1,998 RPM required), comfortably below 1,889 RPM critical speed
+
+4. **Use belt reduction**: Motor runs at higher RPM (better power utilization), screw runs slower. With 3:1 reduction, motor at 11,988 RPM, screw at 3,996 RPM. But screw critical speed unchanged—not helpful here.
+
+**Recommended solution**: Intermediate bearing support or larger diameter screw.
+
+#### **4.2.3 Buckling Load Consideration**
+
+For screws loaded in compression (pushing), buckling can occur before critical speed is reached:
+
+$$F_{cr} = \frac{\pi^2 E I}{(K L)^2}$$
+
+where:
+- $I = \frac{\pi d_s^4}{64}$ for solid shaft
+- $K$ = effective length factor (1.0 for pinned-pinned, 0.7 for fixed-fixed)
+
+For $d_s = 16$ mm, $L = 300$ mm, pinned ends:
+
+$$I = \frac{3.14159 \times 16^4}{64} = 3,217 \text{ mm}^4$$
+
+$$F_{cr} = \frac{3.14159^2 \times 200,000 \times 3,217}{(1.0 \times 300)^2} = \frac{6.34 \times 10^{9}}{9 \times 10^4} = 70,489 \text{ N}$$
+
+This vastly exceeds typical Z-axis loads (1,000–5,000 N), so buckling is not a constraint for this application. However, for long Y-axis screws (>1,500 mm), buckling can become limiting.
+
+### 4.3 Thermal Expansion: The Invisible Error Source
+
+Temperature variations induce dimensional changes that often exceed mechanical deflections, yet are frequently overlooked in amateur designs.
+
+#### **4.3.1 Linear Thermal Expansion**
+
+For a member of length $L$ experiencing temperature change $\Delta T$ (see Section 1.3.2 Thermal Analysis for fundamentals and additional examples):
+
+$$\Delta L = \alpha L \Delta T$$
+
+where $\alpha$ = coefficient of thermal expansion:
+
+| Material | $\alpha$ (×10⁻⁶ /°C) | Notes |
+|----------|---------------------|-------|
+| Steel (mild) | 11–13 | Frame material |
+| Aluminum 6061 | 23–24 | Gantry beams, ~2× steel |
+| Stainless 304 | 17–18 | Corrosion-resistant |
+| Invar | 1–2 | Metrology applications only |
+| Granite | 7–9 | Inspection plates |
+
+**Practical Example:**
+
+Steel frame, $L = 2,500$ mm, ambient temperature swings from 15°C (morning) to 25°C (afternoon), $\Delta T = 10°C$:
+
+$$\Delta L = 12 \times 10^{-6} \times 2,500 \times 10 = 0.30 \text{ mm}$$
+(formula reference: Section 1.3.2)
+
+If this expansion is **symmetric** about a reference point (e.g., center of travel), the tool-to-workpiece position changes by 0.15 mm—three times a typical positioning tolerance!
+
+**Design Mitigation Strategies:**
+
+1. **Define thermal reference point**: Locate encoders or measurement system at a point that remains thermally stable (center of span, bonded to large thermal mass)
+
+2. **Symmetric heating**: Place motors symmetrically so their heat causes uniform expansion. Asymmetric heating causes angular errors:
+   $$\theta \approx \frac{\alpha \Delta T_{diff}}{h}$$
+   where $h$ = beam height, $\Delta T_{diff}$ = temperature difference top-to-bottom
+
+3. **Thermal coupling to floor**: Bond frame feet to concrete via steel plates, providing a low-impedance thermal path to earth's thermal mass (effectively infinite)
+
+4. **Warm-up protocol**: Before precision work, execute rapid traverses for 5–10 minutes to bring all motors and structures to thermal equilibrium
+
+5. **Temperature compensation**: In advanced systems, use temperature sensors and compensate axis positions via control system. Requires careful calibration.
+
+#### **4.3.2 Differential Expansion in Mixed Materials**
+
+When aluminum gantry beam ($\alpha = 24 \times 10^{-6}$ /°C) mounts to steel frame ($\alpha = 12 \times 10^{-6}$ /°C):
+
+Over 1,000 mm length, with 10°C rise:
+- Steel expands: $12 \times 10^{-6} \times 1,000 \times 10 = 0.12$ mm
+- Aluminum expands: $24 \times 10^{-6} \times 1,000 \times 10 = 0.24$ mm
+- Differential: 0.12 mm
+
+This differential creates:
+- Stress at mounting points (potentially causing fastener loosening)
+- Geometric distortion (beam bow or twist)
+- Position-dependent errors
+
+**Solution**: Use **flexure mounts** or **slotted bolt holes** that allow relative motion, with one fixed reference point and remaining mounts sliding.
+
+### 4.4 Resonant Frequency and Dynamic Behavior
+
+Every structure has **natural frequencies** at which it preferentially vibrates. If excitation frequency (motor commutation, cutting tool chatter, rack mesh frequency) matches a natural frequency, **resonance** occurs: small inputs produce large, sustained oscillations.
+
+#### **4.4.1 Single Degree-of-Freedom (SDOF) System**
+
+The simplest model: mass $m$ on spring $k$ with damping $c$:
+
+**Natural frequency**:
+
+$$f_n = \frac{1}{2\pi} \sqrt{\frac{k}{m}} \quad \text{(Hz)}$$
+
+**Damped natural frequency**:
+
+$$f_d = f_n \sqrt{1 - \zeta^2}$$
+
+where **damping ratio**:
+
+$$\zeta = \frac{c}{c_{crit}} = \frac{c}{2\sqrt{k m}}$$
+
+**Design Guidelines:**
+
+- $\zeta < 0.1$: Lightly damped (typical for welded steel, <5% energy dissipation/cycle)
+- $\zeta = 0.2$–0.7: Moderate damping (with viscoelastic dampers or concrete fill)
+- $\zeta = 1$: Critically damped (no oscillation, but rare in structures)
+
+**Resonance Amplification Factor**:
+
+At resonance ($f_{excitation} = f_n$), amplitude magnification:
+
+$$Q = \frac{1}{2 \zeta}$$
+
+For $\zeta = 0.05$ (typical welded steel), $Q = 10$, meaning a 0.01 mm excitation produces 0.10 mm vibration—destroying accuracy.
+
+#### **4.4.2 Multi-Degree-of-Freedom (MDOF) Systems**
+
+Real machines have infinite DOF (continuous structures), but finite element analysis (FEA) or lumped-parameter models approximate this with N DOF, yielding N natural frequencies and mode shapes.
+
+**First mode** (lowest frequency): Usually dominates dynamic behavior. For a simply supported beam:
+
+$$f_1 \approx \frac{1.875^2}{2\pi L^2} \sqrt{\frac{E I}{\rho A}}$$
+
+where:
+- $\rho$ = mass density (kg/mm³): 7.85×10⁻⁶ for steel, 2.70×10⁻⁶ for aluminum
+- $A$ = cross-sectional area (mm²)
+
+**Example: Gantry Beam First Mode**
+
+Beam: 100×150×6mm aluminum tube, $L = 1,250$ mm
+- $I = 1.2 \times 10^7$ mm⁴
+- $A = 100 \times 150 - 94 \times 144 = 1,464$ mm²
+- $\rho = 2.70 \times 10^{-6}$ kg/mm³
+- $E = 69,000$ MPa = 69,000 N/mm²
+
+$$f_1 = \frac{3.516}{2 \times 3.14159 \times 1250^2} \sqrt{\frac{69,000 \times 1.2 \times 10^7}{2.70 \times 10^{-6} \times 1,464}}$$
+
+$$= \frac{3.516}{9.82 \times 10^6} \sqrt{\frac{8.28 \times 10^{11}}{3.95 \times 10^{-3}}}$$
+
+$$= 3.58 \times 10^{-7} \times 1.45 \times 10^{7} = 146 \text{ Hz}$$
+
+**Servo Bandwidth Rule**:
+
+Servo loop bandwidth must remain below $f_n / 5$ to $f_n / 10$ to avoid excitation:
+
+$$f_{servo,max} = \frac{146}{5} \approx 29 \text{ Hz}$$
+
+This limits achievable control stiffness and tracking accuracy. Increasing structural frequency (via stiffer, lighter design) directly enables higher servo performance.
+
+***
+
+---
+
+## References
+
+1. **Young, W.C. & Budynas, R.G. (2011).** *Roark's Formulas for Stress and Strain* (8th ed.). McGraw-Hill
+2. **Gere, J.M. & Timoshenko, S.P. (2012).** *Mechanics of Materials* (8th ed.). Cengage Learning
+3. **Hibbeler, R.C. (2017).** *Structural Analysis* (10th ed.). Pearson
+4. **Beer, F.P. et al. (2015).** *Mechanics of Materials* (7th ed.). McGraw-Hill
+5. **Budynas, R.G. & Nisbett, J.K. (2020).** *Shigley's Mechanical Engineering Design* (11th ed.). McGraw-Hill
+6. **AISC Steel Construction Manual** (15th ed., 2017). American Institute of Steel Construction

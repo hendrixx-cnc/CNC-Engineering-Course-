@@ -1,0 +1,576 @@
+# 9.11 Troubleshooting
+
+Common issues with pick and place systems and systematic approaches to diagnosis and repair.
+
+## Systematic Troubleshooting Approach
+
+**Step 1: Observe and Document**
+- What is the symptom? (missed picks, positioning error, fault code)
+- When did it start? (after what event or change)
+- How often? (intermittent, constant, increasing frequency)
+- Under what conditions? (specific part, position, speed)
+
+**Step 2: Isolate the Problem**
+- Which subsystem? (mechanical, electrical, vision, control)
+- Single component or system interaction?
+- Test subsystems independently
+
+**Step 3: Form Hypothesis**
+- Based on symptoms, what could cause this?
+- List possible causes (most to least likely)
+
+**Step 4: Test Hypothesis**
+- Check each possibility systematically
+- Use measurements, not just guesses
+
+**Step 5: Implement Solution**
+- Make one change at a time
+- Verify fix resolves issue
+- Document solution
+
+## Mechanical Issues
+
+### Positioning Errors
+
+**Symptom**: Robot does not reach commanded position accurately
+
+**Possible Causes**:
+
+1. Belt Tension
+   - Check: Press belt, measure deflection
+   - Fix: Adjust tensioner to spec
+
+2. Backlash in Drive System
+   - Check: Measure position reversal error
+   - Fix: Adjust ball screw preload, tighten couplings
+
+3. Encoder Issues
+   - Check: Verify encoder counts match motion
+   - Fix: Re-align encoder, replace if damaged
+
+4. Loose Mounting Bolts
+   - Check: Torque all structural bolts
+   - Fix: Tighten to specification, use thread-locker
+
+5. Worn Linear Guides
+   - Check: Excessive play, rough motion
+   - Fix: Replace worn guide blocks
+
+6. Thermal Expansion
+   - Check: Positioning worse after warmup?
+   - Fix: Allow warmup period, temperature compensation
+
+**Diagnostic Procedure**:
+1. Move to position multiple times, measure repeatability
+2. If repeatable but inaccurate: Calibration issue
+3. If non-repeatable: Mechanical looseness or wear
+
+### Excessive Vibration
+
+**Symptom**: Robot shakes during motion, poor surface finish, noise
+
+**Possible Causes**:
+
+1. Resonance
+   - Check: Vibration at specific frequency?
+   - Fix: Adjust acceleration, add damping, change speed
+
+2. Loose Components
+   - Check: Inspect all bolts and connections
+   - Fix: Tighten securely
+
+3. Worn Bearings
+   - Check: Rough rotation, play in shaft
+   - Fix: Replace bearings
+
+4. Imbalanced Moving Mass
+   - Check: Vibration worse at high speed?
+   - Fix: Add counterweight, redistribute mass
+
+5. Belt Resonance
+   - Check: Belt flutter during motion
+   - Fix: Increase tension, shorter belt span
+
+6. Control Tuning
+   - Check: PID gains too high (oscillation)
+   - Fix: Reduce gains, optimize tuning
+
+### Binding or Sticking
+
+**Symptom**: Axis moves rough or stops, motor stalls
+
+**Possible Causes**:
+
+1. Misalignment
+   - Check: Linear guides parallel, ball screw aligned
+   - Fix: Re-align components
+
+2. Over-Tightening
+   - Check: Excessive preload on bearings or guides
+   - Fix: Adjust to proper preload
+
+3. Debris
+   - Check: Chips or contamination in guides
+   - Fix: Clean thoroughly, add covers
+
+4. Insufficient Lubrication
+   - Check: Dry appearance, squeaking
+   - Fix: Lubricate per schedule
+
+5. Damaged Components
+   - Check: Bent shaft, damaged ball screw
+   - Fix: Replace damaged parts
+
+6. Collision Damage
+   - Check: Recent crash or impact?
+   - Fix: Inspect and replace bent or broken parts
+
+## Gripper Issues
+
+### Failed Picks (Vacuum)
+
+**Symptom**: Part not picked up, vacuum switch not triggered
+
+**Possible Causes**:
+
+1. Insufficient Vacuum
+   - Check: Vacuum gauge reading
+   - Fix: Increase air pressure (venturi), check pump
+
+2. Leaks
+   - Check: Hissing sound, soap solution test
+   - Fix: Tighten fittings, replace damaged tubing
+
+3. Worn Suction Cups
+   - Check: Cracks, hardening, tears
+   - Fix: Replace cups
+
+4. Valve Malfunction
+   - Check: Manual actuation, electrical signal
+   - Fix: Clean or replace valve
+
+5. Part Surface Issues
+   - Check: Part too porous, textured, or curved
+   - Fix: Use foam cups, multiple cups, or different gripper type
+
+6. Timing
+   - Check: Vacuum applied before contact?
+   - Fix: Adjust program sequence
+
+**Diagnostic Procedure**:
+```
+1. Manually actuate vacuum (bypass controller)
+   - Works: Electrical/control issue
+   - Fails: Pneumatic/mechanical issue
+
+2. Check vacuum level at generator
+   - Low: Compressor pressure, venturi issue
+   - OK: Leak downstream
+
+3. Plug gripper tube, check vacuum
+   - Low: Valve or generator problem
+   - OK: Cup or part interface issue
+```
+
+### Failed Picks (Mechanical Gripper)
+
+**Symptom**: Jaws do not close on part, part slips
+
+**Possible Causes**:
+
+1. Part Misalignment
+   - Check: Part position vs. jaw position
+   - Fix: Adjust pick position, improve vision
+
+2. Insufficient Grip Force
+   - Check: Air pressure, cylinder size
+   - Fix: Increase pressure, larger cylinder
+
+3. Jaw Worn or Damaged
+   - Check: Jaw pad condition
+   - Fix: Replace pads
+
+4. Cylinder Sticking
+   - Check: Smooth cylinder stroke
+   - Fix: Lubricate, replace seals
+
+5. Proximity Sensor False Trigger
+   - Check: Sensor output vs. actual position
+   - Fix: Adjust sensor position, replace if failed
+
+### Dropped Parts
+
+**Symptom**: Part falls during transport
+
+**Possible Causes**:
+
+1. Vacuum Loss
+   - Check: Vacuum level during motion
+   - Fix: Check for leaks, increase vacuum reserve
+
+2. Excessive Acceleration
+   - Check: Dropped during rapid motion?
+   - Fix: Reduce acceleration, increase grip force
+
+3. Part Weight Exceeds Capacity
+   - Check: Gripper specification vs. actual part weight
+   - Fix: Use larger gripper, reduce speed
+
+4. Vibration
+   - Check: Parts drop during rough motion
+   - Fix: Reduce vibration, improve grip
+
+## Vision System Issues
+
+### Part Not Found
+
+**Symptom**: Vision system fails to locate part
+
+**Possible Causes**:
+
+1. Lighting
+   - Check: Image too dark, too bright, glare
+   - Fix: Adjust lighting intensity, angle, or use polarization
+
+2. Focus
+   - Check: Image blurry
+   - Fix: Adjust lens focus, aperture
+
+3. Part Outside Field of View
+   - Check: Part position vs. camera view
+   - Fix: Adjust camera position, widen FOV
+
+4. Occlusion
+   - Check: Part obscured by other objects
+   - Fix: Improve part presentation, staging
+
+5. Algorithm Threshold
+   - Check: Threshold settings too tight
+   - Fix: Adjust vision parameters, retrain
+
+6. Camera Malfunction
+   - Check: No image or corrupted image
+   - Fix: Check cable, power, replace camera
+
+**Diagnostic Procedure**:
+1. Capture and save image
+2. Review image quality (lighting, focus, framing)
+3. Test vision algorithm offline with saved image
+4. Adjust parameters or improve image quality
+
+### Incorrect Position Reported
+
+**Symptom**: Vision reports wrong position, robot picks wrong location
+
+**Possible Causes**:
+
+1. Calibration Error
+   - Check: Known position test piece
+   - Fix: Re-calibrate camera-to-robot transform
+
+2. Lens Distortion
+   - Check: Straight lines appear curved
+   - Fix: Calibrate intrinsic parameters, use undistortion
+
+3. Camera Movement
+   - Check: Camera mounting secure
+   - Fix: Tighten camera mount
+
+4. Wrong Algorithm
+   - Check: Detects wrong feature
+   - Fix: Adjust parameters, use different algorithm
+
+5. Part Variant
+   - Check: Part type different than expected
+   - Fix: Train for multiple variants
+
+### Slow Vision Processing
+
+**Symptom**: Vision cycle time too long
+
+**Possible Causes**:
+
+1. High Resolution Image
+   - Check: Image size
+   - Fix: Reduce resolution, use ROI (region of interest)
+
+2. Complex Algorithm
+   - Check: Processing time per step
+   - Fix: Simplify, use faster algorithm
+
+3. CPU Overload
+   - Check: CPU usage during processing
+   - Fix: Faster computer, optimize code, GPU acceleration
+
+4. Network Latency
+   - Check: Networked camera or PC
+   - Fix: Direct connection, faster network
+
+## Electrical and Control Issues
+
+### Motor Does Not Move
+
+**Symptom**: No motion when commanded
+
+**Possible Causes**:
+
+1. E-Stop Activated
+   - Check: E-stop button status
+   - Fix: Reset e-stop, investigate why triggered
+
+2. Drive Fault
+   - Check: Drive display, fault code
+   - Fix: Clear fault, address root cause
+
+3. Enable Signal Missing
+   - Check: Drive enable input
+   - Fix: Check wiring, controller output
+
+4. No Command Signal
+   - Check: Step/direction or analog command at drive
+   - Fix: Controller output, cable connection
+
+5. Motor Cable Disconnected
+   - Check: Cable connections at motor and drive
+   - Fix: Reconnect, check for damage
+
+6. Software Limit Exceeded
+   - Check: Controller limit status
+   - Fix: Jog opposite direction, adjust limits
+
+**Diagnostic Procedure**:
+```
+1. Check drive power LED
+   - Off: Power supply issue
+   - On: Proceed to step 2
+
+2. Check drive enable signal
+   - Not present: Controller or wiring issue
+   - Present: Proceed to step 3
+
+3. Manually jog from controller
+   - Works: Program issue
+   - Fails: Drive, motor, or feedback issue
+
+4. Check fault codes on drive
+   - Displays fault: Address specific fault
+   - No fault: Motor or cable issue
+```
+
+### Encoder Errors
+
+**Symptom**: Encoder fault, following error, motor runaway
+
+**Possible Causes**:
+
+1. Encoder Cable Disconnected
+   - Check: Cable connections
+   - Fix: Reconnect, secure strain relief
+
+2. Encoder Power Missing
+   - Check: +5V at encoder
+   - Fix: Check power supply, wiring
+
+3. Noise Interference
+   - Check: Encoder signal quality (oscilloscope)
+   - Fix: Shielded cable, proper grounding, route away from power cables
+
+4. Encoder Misalignment
+   - Check: Encoder mounting
+   - Fix: Re-align encoder to motor shaft
+
+5. Encoder Damaged
+   - Check: No signal or erratic counts
+   - Fix: Replace encoder
+
+### Communication Faults
+
+**Symptom**: Controller cannot communicate with drives, I/O, or vision system
+
+**Possible Causes**:
+
+1. Cable Disconnected
+   - Check: Physical connections
+   - Fix: Reconnect, secure
+
+2. Wrong Baud Rate / Settings
+   - Check: Communication parameters match
+   - Fix: Configure both devices identically
+
+3. Termination Missing
+   - Check: Network termination resistors (RS-485, CAN)
+   - Fix: Add terminators at both ends
+
+4. Network Conflict
+   - Check: Duplicate addresses or IP conflicts
+   - Fix: Assign unique addresses
+
+5. Electrical Noise
+   - Check: Intermittent errors during motor motion
+   - Fix: Shielded cables, proper grounding
+
+6. Failed Component
+   - Check: Substitute known-good device
+   - Fix: Replace failed device
+
+## Software and Programming Issues
+
+### Program Faults or Crashes
+
+**Symptom**: Program stops with error, unexpected behavior
+
+**Possible Causes**:
+
+1. Syntax Error
+   - Check: Error message, line number
+   - Fix: Correct syntax
+
+2. Unreachable Position
+   - Check: Position beyond limits or singularity
+   - Fix: Adjust position, check kinematics
+
+3. Missing Subroutine
+   - Check: Called subroutine exists
+   - Fix: Add missing routine or fix call
+
+4. Variable Out of Range
+   - Check: Array index, division by zero
+   - Fix: Validate inputs, add error checking
+
+5. Timeout
+   - Check: Waiting for signal that never comes
+   - Fix: Check I/O, add timeout handling
+
+### Inconsistent Behavior
+
+**Symptom**: Robot behaves differently between runs
+
+**Possible Causes**:
+
+1. Uninitialized Variables
+   - Check: Variables set before use
+   - Fix: Initialize at program start
+
+2. Race Conditions
+   - Check: Timing-dependent behavior
+   - Fix: Add synchronization, dwells
+
+3. External Interference
+   - Check: Operator interaction, other equipment
+   - Fix: Isolate robot, add interlocks
+
+4. Hardware Intermittent Fault
+   - Check: Sensors, connections
+   - Fix: Replace suspect components
+
+## Safety System Issues
+
+### Unexpected Stops
+
+**Symptom**: Robot stops during operation, no operator action
+
+**Possible Causes**:
+
+1. Light Curtain Triggered
+   - Check: Beam broken, alignment
+   - Fix: Clear obstruction, realign
+
+2. Safety Mat Activation
+   - Check: Mat status
+   - Fix: Clear mat, check for debris
+
+3. Guard Interlock Open
+   - Check: Guard switch status
+   - Fix: Close guard, check switch alignment
+
+4. Vibration False Trigger
+   - Check: Timing of stops vs. motion
+   - Fix: Secure sensors, adjust sensitivity
+
+### Safety System Bypass Attempt
+
+**Symptom**: Operator wants to bypass safety devices
+
+**Root Causes**:
+- Nuisance trips (false alarms)
+- Perceived production pressure
+- Lack of understanding
+
+**Solutions**:
+- Address root cause of nuisance trips
+- Reinforce training on safety importance
+- Management support for safety priority
+- Never allow bypassing safety devices
+
+## Emergency Procedures
+
+**Robot Collision**
+1. Press e-stop immediately
+2. Lockout/tagout power
+3. Inspect for damage (bent parts, cracked welds)
+4. Check alignment and function before restart
+5. Investigate root cause
+
+**Fire or Smoke**
+1. Press e-stop
+2. Evacuate personnel
+3. Call emergency services
+4. Use appropriate fire extinguisher (electrical Class C)
+5. Do not restart until inspected
+
+**Trapped Personnel**
+1. Press e-stop
+2. Lockout/tagout
+3. Manually release gripper or move axes
+4. Provide first aid
+5. Investigate and prevent recurrence
+
+## Troubleshooting Tools
+
+**Diagnostic Equipment**
+- Multimeter (voltage, continuity)
+- Oscilloscope (signal quality, timing)
+- Dial indicator (position accuracy)
+- Vacuum gauge
+- Infrared thermometer
+- Vibration analyzer
+
+**Software Tools**
+- Controller diagnostics and logs
+- Vision system test mode
+- Drive configuration software
+- Network analyzer (Wireshark for Ethernet)
+
+**Documentation**
+- Electrical schematics
+- Mechanical drawings
+- Software backups and version history
+- Maintenance logs
+
+***
+
+**Next**: [9.12 Conclusion](section-9.12-conclusion.md)
+
+---
+
+## References
+
+1. **Troubleshooting Methodology**
+   - Systematic fault diagnosis techniques
+   - Root cause analysis (RCA) - 5 Whys, Fishbone diagrams
+   - Failure Mode and Effects Analysis (FMEA)
+
+2. **Diagnostic Tools**
+   - Oscilloscope usage - Tektronix, Keysight application notes
+   - Network protocol analyzers - Wireshark documentation
+   - Motor drive diagnostic software - Manufacturer manuals
+
+3. **Motion System Troubleshooting**
+   - Servo system tuning and diagnostics
+   - Encoder troubleshooting guides
+   - Mechanical alignment and backlash measurement
+
+4. **Vision System Diagnostics**
+   - Camera and lighting troubleshooting
+   - Image quality assessment techniques
+   - Calibration verification procedures

@@ -1,0 +1,671 @@
+# 10.11 Troubleshooting
+
+Systematic troubleshooting minimizes downtime and identifies root causes. This section covers common problems, diagnostic procedures, and solutions.
+
+## Systematic Approach
+
+### Troubleshooting Methodology
+
+**1. Gather Information**
+- What is the symptom?
+- When did it start?
+- What changed recently?
+- Is it constant or intermittent?
+- Any error codes or alarms?
+
+**2. Verify the Problem**
+- Reproduce the issue
+- Note exact conditions
+- Document error messages
+- Capture screenshots or videos
+
+**3. Check Obvious Causes**
+- Emergency stop engaged?
+- Safety devices triggered?
+- Power supply issues?
+- Correct operating mode?
+
+**4. Isolate the Subsystem**
+- Mechanical, electrical, or software?
+- Specific joint or axis?
+- Controller, drive, or motor?
+
+**5. Form Hypothesis**
+- List possible causes (most to least likely)
+- Based on symptoms and experience
+
+**6. Test Hypothesis**
+- Make one change at a time
+- Verify result before proceeding
+- Use measurements, not assumptions
+
+**7. Implement Solution**
+- Fix root cause, not symptoms
+- Verify complete resolution
+- Document solution and preventive measures
+
+## Motion and Positioning Issues
+
+### Robot Does Not Move
+
+**Symptom**: No motion when commanded
+
+**Check List**
+
+1. **Emergency Stop**
+   - Is e-stop pressed?
+   - Reset and verify release
+   - Check all e-stops in system
+
+2. **Operating Mode**
+   - Correct mode selected (Auto/Manual)?
+   - Enabling device active (if manual mode)?
+   - Mode selector key switch position
+
+3. **Safety Circuits**
+   - Are all guards closed?
+   - Light curtains clear?
+   - Safety relay status
+   - Check safety circuit wiring
+
+4. **Controller Status**
+   - Controller powered on?
+   - No fault codes displayed?
+   - Motors enabled?
+   - Servo drives ready (LED indicators)
+
+5. **Motor Power**
+   - Main contactor energized?
+   - Drive enable signal present?
+   - Check drive fault LEDs
+   - Measure motor supply voltage
+
+6. **Software Limits**
+   - Position within software limits?
+   - Check limit status in controller
+   - Jog away from limit if at boundary
+
+**Diagnostic Procedure**
+```
+1. Press e-stop, release, observe behavior
+   - No change: E-stop circuit issue
+
+2. Check controller display for faults
+   - Drive fault: Investigate specific drive
+   - Communication fault: Check cables
+
+3. Manually jog single joint (if possible)
+   - Works: Program or command issue
+   - Fails: Hardware problem
+
+4. Monitor drive enable signal (oscilloscope/multimeter)
+   - Not present: Controller or safety circuit
+   - Present but no motion: Drive or motor fault
+```
+
+### Positioning Errors
+
+**Symptom**: Robot doesn't reach commanded position accurately
+
+**Possible Causes**
+
+1. **Calibration Drift**
+   - Check: Move to known taught position, measure deviation
+   - Solution: Re-calibrate TCP or re-master joints
+   - Preventive: Regular calibration checks
+
+2. **Encoder Issues**
+   - Check: Encoder signal quality (oscilloscope)
+   - Symptoms: Erratic positioning, intermittent errors
+   - Solution: Re-align or replace encoder
+   - Check encoder cable integrity
+
+3. **Mechanical Backlash**
+   - Check: Reverse direction, measure position change
+   - Sources: Belt stretch, gear wear, loose couplings
+   - Solution: Tighten belts, replace worn gears, adjust preload
+
+4. **Gearbox Wear**
+   - Check: Measure backlash at output
+   - Harmonic drive: <1 arcmin acceptable, >3 arcmin replace
+   - Planetary: <5 arcmin acceptable
+   - Solution: Replace or rebuild gearbox
+
+5. **Structural Deflection**
+   - Check: Position error correlates with payload or orientation
+   - Measure: Use dial indicator under load
+   - Solution: Reduce payload, reinforce structure, or accept limitation
+
+6. **Thermal Expansion**
+   - Check: Worse after warmup?
+   - Measure: Position when cold vs. hot
+   - Solution: Allow warmup period, temperature compensation
+
+**Diagnostic Test**
+
+Repeatability Test:
+1. Move to target position 20 times
+2. Measure position each time
+3. Calculate standard deviation
+4. Repeatability should be <0.05 mm for most robots
+
+If repeatable but inaccurate:
+- Calibration issue
+- Kinematic parameter error
+
+If not repeatable:
+- Mechanical looseness
+- Encoder problems
+- Backlash
+
+### Erratic Motion or Vibration
+
+**Symptom**: Robot shakes, oscillates, or moves roughly
+
+**Possible Causes**
+
+1. **Control Tuning**
+   - PID gains too high
+   - Check: Reduce proportional and derivative gains
+   - Tune: Start low, increase gradually
+   - Use auto-tune if available
+
+2. **Mechanical Resonance**
+   - Structure vibrates at specific frequency
+   - Check: Occurs at certain speeds or positions?
+   - Solution: Change acceleration, add damping, adjust gains
+
+3. **Encoder Noise**
+   - Electrical interference
+   - Check: Encoder signals with oscilloscope
+   - Solution: Shield cables, separate from power, ground properly
+
+4. **Loose Components**
+   - Bolts, couplings, bearings
+   - Check: Inspect and torque all fasteners
+   - Listen: Rattle or clicking indicates looseness
+
+5. **Worn Bearings**
+   - Check: Roughness when manually rotating joint
+   - Listen: Grinding noise
+   - Feel: Excessive play
+   - Solution: Replace bearings
+
+6. **Belt Issues**
+   - Too loose: Vibration, tooth jumping
+   - Too tight: Excessive bearing load, motor strain
+   - Check: Belt tension (1-2% deflection)
+   - Solution: Adjust tensioner
+
+**Diagnostic Procedure**
+
+Isolate Affected Joint:
+1. Move only one joint at a time
+2. Identify which joint(s) vibrate
+3. Vary speed and acceleration
+4. Note when vibration occurs
+
+Test with No Load:
+- Remove tool or payload
+- If vibration stops: Inertia or balance issue
+- If continues: Internal robot problem
+
+### Following Error Alarms
+
+**Symptom**: Position error exceeds limit, robot stops
+
+**Causes**
+
+1. **Excessive Load**
+   - Payload beyond capacity
+   - Friction or binding
+   - Check: Reduce speed, check load rating
+
+2. **Acceleration Too High**
+   - Commanded acceleration exceeds capability
+   - Solution: Reduce acceleration in program
+
+3. **Servo Drive Fault**
+   - Insufficient torque output
+   - Check: Drive status LEDs, error codes
+   - Test: Swap drive with known good
+
+4. **Encoder Problems**
+   - Skipped counts, poor signals
+   - Check: Signal quality
+   - Solution: Replace encoder or cable
+
+5. **Gearbox Binding**
+   - Damaged gears, lack of lubrication
+   - Check: Motor current (high indicates resistance)
+   - Listen: Grinding noise
+   - Solution: Service or replace gearbox
+
+## Electrical Issues
+
+### Drive Faults
+
+**Overvoltage**
+- Cause: Excessive regenerative energy during deceleration
+- Check: DC bus voltage
+- Solution: Slower deceleration, regenerative resistor
+
+**Overcurrent**
+- Cause: Short circuit, motor fault, overload
+- Check: Motor winding resistance (should be few ohms, balanced)
+- Inspect: Cable damage, motor contamination
+- Solution: Repair or replace motor, check load
+
+**Overtemperature**
+- Cause: Excessive duty cycle, inadequate cooling
+- Check: Drive and motor temperatures
+- Verify: Fan operation, clean heat sinks
+- Solution: Reduce duty cycle, improve cooling
+
+**Encoder Fault**
+- Cause: Cable damage, encoder failure, noise
+- Check: Encoder cable continuity
+- Test: Swap with another axis encoder
+- Solution: Replace cable or encoder
+
+**Communication Error**
+- Cause: Network issue, cable fault, EMI
+- Check: Network cable integrity
+- Verify: Termination resistors
+- Solution: Replace cable, add shielding
+
+### Power Supply Issues
+
+**Controller Won't Power On**
+
+Check:
+1. Main power supply voltage (measure at input)
+2. Circuit breakers and fuses
+3. Control transformer (if present)
+4. Power supply outputs (24V DC, etc.)
+
+**Intermittent Power Loss**
+
+Causes:
+- Loose connections
+- Overload (breaker trips)
+- Failing power supply
+
+Diagnosis:
+- Monitor voltages during operation
+- Check current draw
+- Thermal image of connections (hot spots)
+
+### Cable and Connector Problems
+
+**Intermittent Faults**
+
+Symptoms:
+- Errors appear and disappear
+- Occur during specific motions
+- Vibration-related
+
+Diagnosis:
+- Wiggle cables while monitoring
+- Flex cables through normal range
+- Inspect for kinks or sharp bends
+
+Solutions:
+- Re-terminate connectors
+- Replace damaged cables
+- Improve cable routing and strain relief
+
+**Open or Short Circuits**
+
+Test:
+- Multimeter continuity check
+- Measure resistance (each conductor to ground, conductor to conductor)
+- Compare to good cable
+
+## Software and Programming Issues
+
+### Program Errors
+
+**Unreachable Position**
+
+Error: Inverse kinematics has no solution
+
+Causes:
+- Position outside workspace
+- Orientation not achievable
+- Near singularity
+
+Solutions:
+- Adjust target position
+- Use different joint configuration
+- Add intermediate via points
+
+**Singularity Errors**
+
+Symptom: Cannot execute Cartesian move
+
+Causes:
+- Path passes through or near singularity
+- Wrist, shoulder, or elbow singularity
+
+Solutions:
+- Use joint space motion (MOVEJ instead of MOVEL)
+- Reorient approach to avoid singularity
+- Add via point to guide path around singularity
+
+**Syntax Errors**
+
+Specific to robot programming language:
+- Check documentation for correct syntax
+- Verify variable declarations
+- Match brackets, parentheses, END statements
+
+**Logic Errors**
+
+Program runs but incorrect behavior:
+- Step through program in simulation or slow motion
+- Check variable values
+- Verify conditional logic
+- Add logging or status messages
+
+### Communication Failures
+
+**Robot-to-CNC Communication**
+
+Symptoms:
+- Timeout errors
+- No handshaking
+- Wrong data received
+
+Diagnosis:
+1. Verify network settings (IP addresses, subnet masks)
+2. Test connectivity (ping)
+3. Monitor traffic (Wireshark or network analyzer)
+4. Check protocol settings (baud rate, parity for serial)
+
+Solutions:
+- Correct IP address conflicts
+- Replace damaged network cables
+- Verify protocol configuration matches
+
+**I/O Not Working**
+
+Digital Output:
+- Check: Physical wiring to output terminal
+- Measure: Voltage at terminal (should be 24V when on, 0V when off)
+- Test: Toggle output from controller
+- Verify: Correct output number in program
+
+Digital Input:
+- Check: Sensor wiring and power
+- Test: Sensor independently (continuity or voltage)
+- Measure: Input terminal voltage
+- Verify: Correct input number in program
+
+## Gripper and Tool Issues
+
+### Vacuum Gripper Failures
+
+**No Vacuum**
+
+Check:
+1. Compressed air supply pressure (6 bar typical)
+2. Venturi generator condition (clogged?)
+3. Solenoid valve operation (manual test)
+4. Tubing for leaks (hissing sound)
+5. Vacuum gauge reading
+
+**Weak Vacuum**
+
+Causes:
+- Worn vacuum cups (cracks, hardening)
+- Air leaks in system
+- Low supply pressure
+- Venturi wear
+
+Solutions:
+- Replace vacuum cups
+- Find and seal leaks (soap solution test)
+- Increase supply pressure
+- Replace venturi generator
+
+**Part Drops**
+
+Causes:
+- Insufficient vacuum
+- Part too heavy or porous
+- Excessive acceleration
+- Vibration
+
+Solutions:
+- Larger or more vacuum cups
+- Increase vacuum (higher flow venturi)
+- Reduce acceleration
+- Improve grip surface (foam vs. bellows cups)
+
+### Mechanical Gripper Issues
+
+**Won't Close or Open**
+
+Pneumatic:
+- Check air pressure
+- Verify solenoid valve switching
+- Inspect cylinder seals
+- Look for obstructions
+
+Electric:
+- Check motor power
+- Verify control signals
+- Test encoder feedback
+- Inspect mechanical jam
+
+**Weak Grip**
+
+Pneumatic:
+- Increase air pressure (within gripper rating)
+- Check for air leaks
+- Inspect jaws for wear
+
+Electric:
+- Increase current limit (if adjustable)
+- Check motor and gearbox
+
+**Jaws Misaligned**
+
+Causes:
+- Bent guide rods
+- Worn bushings
+- Loose mounting
+
+Solutions:
+- Replace damaged parts
+- Realign and secure
+
+## Controller and Software Issues
+
+### Controller Crashes or Freezes
+
+**Symptoms**
+- Unresponsive teach pendant
+- Controller display frozen
+- Program stops unexpectedly
+
+**Diagnosis**
+
+Check:
+1. CPU load (if monitoring available)
+2. Memory usage
+3. Error logs for software exceptions
+4. Network traffic (broadcast storms?)
+
+**Solutions**
+
+- Reboot controller (last resort)
+- Identify and fix software bug
+- Optimize program (reduce loop complexity)
+- Update firmware (if known bug)
+
+**Preventive**
+
+- Regular software backups
+- Avoid overly complex programs
+- Monitor system resources
+- Keep firmware updated
+
+### Data Loss
+
+**Programs or Positions Lost**
+
+Causes:
+- Battery failure (encoder or controller)
+- Hard drive failure
+- Corruption during save
+
+Solutions:
+- Restore from backup
+- Re-teach positions (if no backup)
+- Replace battery/hard drive
+
+Preventive:
+- Regular backups (automated)
+- Replace batteries on schedule
+- Use redundant storage
+
+### Calibration Lost
+
+**Mastering Lost**
+
+Symptoms:
+- Position offsets by consistent amount
+- Robot moves to wrong absolute positions
+
+Causes:
+- Encoder battery dead
+- Power loss during operation
+- Encoder replaced
+
+Solution:
+- Re-master all joints (follow manufacturer procedure)
+- Verify with test program
+
+**TCP Calibration Incorrect**
+
+Symptoms:
+- Position accuracy varies with orientation
+- Circular paths not circular
+
+Solution:
+- Re-calibrate TCP using four-point method
+- Verify all tool offsets
+
+## Emergency Procedures
+
+### Collision Recovery
+
+**After Impact**
+
+1. **Immediate**:
+   - Press emergency stop
+   - Ensure no personnel injured
+   - Assess damage visually
+
+2. **Inspection**:
+   - Check for bent links or joints
+   - Inspect gearboxes (listen for damage)
+   - Verify encoder alignment
+   - Look for cracked welds or fasteners
+
+3. **Functional Test**:
+   - Manually move each joint (power off, brakes released)
+   - Check for binding or unusual resistance
+   - Power on, jog each joint slowly
+   - Run test program at low speed
+
+4. **Recalibration**:
+   - Verify accuracy at known positions
+   - Re-calibrate if needed
+   - Check for new vibrations or noises
+
+5. **Root Cause**:
+   - Identify why collision occurred
+   - Fix programming error, sensor failure, or procedural issue
+   - Implement preventive measures
+
+### Runaway Robot
+
+**Uncontrolled Motion**
+
+Actions:
+1. Press emergency stop immediately
+2. Do not attempt to manually stop robot
+3. Evacuate area
+4. Lockout/tagout after motion stops
+
+Causes:
+- Encoder failure (motor doesn't know position)
+- Drive fault (continuous torque output)
+- Software error
+
+Investigation:
+- Do NOT restart until root cause identified
+- Check encoder signals
+- Inspect drive LEDs and error codes
+- Review program logic
+- Consult manufacturer support
+
+### Electrical Fire or Smoke
+
+**Response**
+
+1. Press emergency stop
+2. If safe, disconnect main power
+3. Evacuate personnel
+4. Call emergency services
+5. Use Class C fire extinguisher (electrical) if small and safe
+
+**Do NOT**:
+- Use water
+- Open control cabinet if fire inside (oxygen feeds fire)
+- Restart until inspected by qualified electrician
+
+## Diagnostic Tools
+
+**Essential Tools**
+
+- Multimeter (voltage, resistance, continuity)
+- Oscilloscope (encoder signals, noise)
+- Dial indicator (positioning accuracy)
+- Teach pendant (built-in diagnostics)
+- Laptop with controller software
+
+**Helpful Tools**
+
+- Thermal camera (hot spots, bearing failures)
+- Vibration analyzer (bearing condition)
+- Vacuum gauge (gripper diagnosis)
+- Network cable tester
+- Spare cables (for swapping tests)
+
+**Documentation**
+
+- Electrical schematics
+- Mechanical drawings
+- Software manuals
+- Error code lists
+- Manufacturer support contacts
+
+---
+
+**Next**: [10.12 Conclusion](section-10.12-conclusion.md)
+
+---
+
+## References
+
+1. **ISO 10218-1:2011** - Robots and robotic devices - Safety requirements
+2. **ISO 9283:1998** - Manipulating industrial robots - Performance criteria
+3. **Denavit, J. & Hartenberg, R.S. (1955).** "A Kinematic Notation for Lower-Pair Mechanisms." *ASME Journal of Applied Mechanics*, 22, 215-221
+4. **Craig, J.J. (2017).** *Introduction to Robotics: Mechanics and Control* (4th ed.). Pearson
+5. **Lynch, K.M. & Park, F.C. (2017).** *Modern Robotics*. Cambridge University Press
+6. **ABB Robot Studio Software** - Robot simulation and programming
+7. **KUKA System Software (KSS)** - Robot control and motion planning
